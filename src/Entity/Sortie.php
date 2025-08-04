@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SortieRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -52,9 +54,28 @@ class Sortie
     )]    #[ORM\Column(length: 2000, nullable: true)]
     private ?string $infosSortie = null;
 
-    #[Assert\NotBlank(message: "Veuillez préciser l'état de la sortie")]
-    #[ORM\Column(length: 100)]
-    private ?string $etat = null;
+    #[ORM\ManyToOne(inversedBy: 'sorties')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Etat $etat = null;
+
+    #[ORM\ManyToOne(inversedBy: 'sorties')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Lieu $lieu = null;
+
+    /**
+     * @var Collection<int, Participant>
+     */
+    #[ORM\ManyToMany(targetEntity: Participant::class, mappedBy: 'estInscrit')]
+    private Collection $participants;
+
+    #[ORM\ManyToOne(inversedBy: 'organisateur')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Participant $organisateur = null;
+
+    public function __construct()
+    {
+        $this->participants = new ArrayCollection();
+    }
 
 
 
@@ -143,6 +164,57 @@ class Sortie
     public function setEtat(string $etat): static
     {
         $this->etat = $etat;
+
+        return $this;
+    }
+
+    public function getLieu(): ?Lieu
+    {
+        return $this->lieu;
+    }
+
+    public function setLieu(?Lieu $lieu): static
+    {
+        $this->lieu = $lieu;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Participant>
+     */
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
+
+    public function addParticipant(Participant $participant): static
+    {
+        if (!$this->participants->contains($participant)) {
+            $this->participants->add($participant);
+            $participant->addEstInscrit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipant(Participant $participant): static
+    {
+        if ($this->participants->removeElement($participant)) {
+            $participant->removeEstInscrit($this);
+        }
+
+        return $this;
+    }
+
+    public function getOrganisateur(): ?Participant
+    {
+        return $this->organisateur;
+    }
+
+    public function setOrganisateur(?Participant $organisateur): static
+    {
+        $this->organisateur = $organisateur;
 
         return $this;
     }
