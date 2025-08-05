@@ -7,6 +7,7 @@ use App\Entity\Participant;
 use App\Entity\Sortie;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -31,7 +32,7 @@ class ParticipantType extends AbstractType
                 'label' => 'telephone',
                 'required' => false,
             ])
-            ->add('mail', TextType::class, [
+            ->add('mail', EmailType::class, [
                 'label' => 'mail',
             ])
             ->add('motPasse', PasswordType::class, [

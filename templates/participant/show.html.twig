@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    détails participant | {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <h1>Détails Participants</h1>
+    <dl>
+        <dt>Nom :</dt>
+        <dd>{{ participant.nom }}</dd>
+
+        <dt>Prénom :</dt>
+        <dd>{{ participant.prenom }}</dd>
+
+        <dt>Pseudo :</dt>
+        <dd>{{ participant.pseudo }}</dd>
+
+        <dt>Téléphone :</dt>
+        <dd>{{ participant.telephone }}</dd>
+
+        <dt>Mail :</dt>
+        <dd>{{ participant.mail }}</dd>
+
+        <dt>Administrateur :</dt>
+        <dd>{{ participant.administrateur }}</dd>
+
+        <dt>Actif :</dt>
+        <dd>{{ participant.actif }}</dd>
+
+        <dt>Campus :</dt>
+        <dd>{{ participant.campus.nom }}</dd>
+    </dl>
+{% endblock %}
+
