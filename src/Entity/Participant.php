@@ -6,6 +6,8 @@ use App\Repository\ParticipantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\Exception\AccountStatusException;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -24,44 +26,44 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[Assert\NotBlank(message: "Veuillez renseigner le champ nom")]
-    #[Assert\Range(
-        min:2,
-        max:100,
-        minmessage: "Le nom doit contenir au moins {{ limit }} caractères",
-        maxmessage: "Le nom ne doit pas contenir plus de {{ limit }} caractères",
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le nom ne peut contenir plus de {{ limit }} caractères",
     )]
     #[ORM\Column(length: 100)]
     private ?string $nom = null;
 
 
     #[Assert\NotBlank(message: "Veuillez renseigner le champ prénom")]
-    #[Assert\Range(
-        min:2,
-        max:100,
-        minmessage: "Le prénom doit contenir au moins {{ limit }} caractères",
-        maxmessage: "Le prénom ne doit pas contenir plus de {{ limit }} caractères",
+    #[Assert\Length(
+        minMessage: "Le prénom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le prénom ne peut contenir plus de {{ limit }} caractères",
+        min: 2,
+        max: 100,
     )]
     #[ORM\Column(length: 100)]
     private ?string $prenom = null;
 
 
     #[Assert\NotBlank(message: "Veuillez renseigner le champ pseudo")]
-    #[Assert\Range(
-        min:2,
-        max:100,
-        minmessage: "Le pseudo doit contenir au moins {{ limit }} caractères",
-        maxmessage: "Le pseudo ne doit pas contenir plus de {{ limit }} caractères",
+    #[Assert\Length(
+        minMessage: "Le pseudo doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le pseudo ne peut contenir plus de {{ limit }} caractères",
+        min: 2,
+        max: 100,
     )]
     #[ORM\Column(length: 100, unique:true)]
     private ?string $pseudo = null;
 
 
-    #[Assert\Length(max:10, maxmessage: "Le numéro de téléphone doit contenir au maximum {{ limit }} caractères")]
+    #[Assert\Length(max:10, maxMessage: "Le numéro de téléphone doit contenir au maximum {{ limit }} caractères")]
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $telephone = null;
 
     #[Assert\NotBlank(message: "Veuillez renseigner le champ de l'adresse email")]
-    #[Assert\Length(max:180, maxmessage: "L' adresse mail ne peut dépasser {{ limit }} caractères")]
+    #[Assert\Length(max:180, maxMessage: "L' adresse mail ne peut dépasser {{ limit }} caractères")]
     #[Assert\Email(message: "Veuillez renseigner une adresse email valide")]
     #[ORM\Column(length: 180, unique:true)]
     private ?string $mail = null;
@@ -95,6 +97,8 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->estInscrit = new ArrayCollection();
         $this->organisateur = new ArrayCollection();
+        $this->SetAdministrateur(false);
+        $this->Setactif(true);
     }
 
 
@@ -164,10 +168,10 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /* public function getMotPasse(): ?string
+     public function getMotPasse(): ?string
     {
         return $this->motPasse;
-    } */
+    }
 
     public function setMotPasse(string $motPasse): static
     {
@@ -202,7 +206,16 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return ['ROLE_USER'];
+        if(!$this->actif){
+            throw new CustomUserMessageAccountStatusException("Votre compte est inactif. Veuillez contacter l'administrateur.");
+        }
+
+        // Ajout du rôle ROLE_ADMIN si l'utilisateur est administrateur
+        $roles = ['ROLE_USER'];
+        if ($this->isAdministrateur()) {
+            $roles[] = 'ROLE_ADMIN';
+        }
+        return $roles;
     }
 
     public function eraseCredentials()

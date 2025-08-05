@@ -31,6 +31,13 @@ class ParticipantRepository extends ServiceEntityRepository implements UserLoade
             ->setParameter('query', $usernameOrEmail)
             ->getOneOrNullResult();
     }
+
+    public function updateUser()
+    {
+
+    }
+
+
 }
 
 
