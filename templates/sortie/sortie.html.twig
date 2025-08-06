@@ -6,5 +6,48 @@
 
     <h1>Les sorties</h1>
 
+    {# Selection du filtre par Campus #}
+    <form method="post" action="{{ path('sortie_list') }}">
+        <label for="campus">Campus :</label>
+        <select id="campus" name="campus" onchange="this.form.submit()">
+            <option value="">--- Tous les campus ---</option>
+            {% for campus in campusList %}
+                <option value="{{ campus.id }}" {% if campus.id == selectedCampus %}selected{% endif %}>
+                    {{ campus.nom }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Nom de la sortie</th>
+            <th>Date de la sortie</th>
+            <th>Clôture</th>
+            <th>Inscrits/Places</th>
+            <th>Etat</th>
+            <th>Inscrit</th>
+            <th>Organisateur</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sortie in sorties %}
+            <tr>
+                <td>{{ sortie.nom }}</td>
+                <td>{{ sortie.dateHeureDebut | date("d-m-Y") }}</td>
+                <td>{{ sortie.dateLimiteInscription | date("d-m-Y") }}</td>
+                <td>{{ sortie.participants|length }} / {{ sortie.nbInscriptionMax }}</td>
+                <td>{{ sortie.etat.libelle }}</td>
+                <td>{% if user in sortie.participants %}X{% else %}{% endif %}</td>
+                <td>{{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</td>
+                <td>
+                    <a href=""></a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
 {% endblock %}

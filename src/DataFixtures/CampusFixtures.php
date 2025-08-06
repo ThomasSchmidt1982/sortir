@@ -17,6 +17,20 @@ class CampusFixtures extends Fixture
 
         $faker = \Faker\Factory::create('fr_FR');
 
+
+
+        $campusList = ['Niort', 'Nantes', 'Paris', 'La Roche s/Yon', 'Toulouse',];
+
+        foreach($campusList as $CampusNom){
+            $campus = new Campus();
+            $campus->setNom($CampusNom);
+            $manager->persist($campus);
+            $this->addReference($CampusNom, $campus);
+        }
+        $manager->flush();
+
+
+        /*
         //création des Campus
         $campus1 = new Campus();
         $campus1->setNom('SAINT-HERBLAIN');
@@ -24,8 +38,8 @@ class CampusFixtures extends Fixture
         $manager->persist($campus1);
 
         $campus2 = new Campus();
-        $campus2->setNom('CHARTRES DE BRETAGNE');
-        $this->addReference('CDB', $campus2);
+        $campus2->setNom('CHARTRES');
+        $this->addReference('C', $campus2);
         $manager->persist($campus2);
 
         $campus3 = new Campus();
@@ -35,9 +49,20 @@ class CampusFixtures extends Fixture
 
         $campus4 = new Campus();
         $campus4->setNom('NIORT');
-        $this->addReference('N', $campus4);
+        $this->addReference('NI', $campus4);
         $manager->persist($campus4);
 
-        $manager->flush();
+        $campus5 = new Campus();
+        $campus5->setNom('NANTES');
+        $this->addReference('NA', $campus4);
+        $manager->persist($campus5);
+
+        $campus6 = new Campus();
+        $campus6->setNom('LYON');
+        $this->addReference('L', $campus4);
+        $manager->persist($campus4);
+*/
+
+
     }
 }

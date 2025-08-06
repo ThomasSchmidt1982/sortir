@@ -31,21 +31,9 @@ class ParticipantFixtures extends Fixture implements DependentFixtureInterface
         $admin->setTelephone('0123456789');
         $admin->setActif(true);
         $admin->setAdministrateur(true);
-        $admin->setCampus($this->getReference('LRSY', Campus::class));
-        $manager->persist($admin);
+        $admin->setCampus($this->getReference('Niort', Campus::class));
 
-        // création de 1 user actif
-        $user1 = new Participant();
-        $user1->setNom('User');
-        $user1->setPrenom('actif');
-        $user1->setPseudo('ua');
-        $user1->setMail('actif.user@sortir.fr');
-        $user1->setMotPasse($this->passwordHasher->hashPassword($user1,'123456'));
-        $user1->setTelephone('1234567891');
-        $user1->setActif(true);
-        $user1->setAdministrateur(false);
-        $user1->setCampus($this->getReference('SH', Campus::class));
-        $manager->persist($user1);
+        $manager->persist($admin);
 
         // création de 1 user INACTIF
         $user2 = new Participant();
@@ -57,9 +45,32 @@ class ParticipantFixtures extends Fixture implements DependentFixtureInterface
         $user2->setTelephone('1234567891');
         $user2->setActif(false);
         $user2->setAdministrateur(false);
-        $user2->setCampus($this->getReference('N', Campus::class));
+        $user2->setCampus($this->getReference('Paris', Campus::class));
 
         $manager->persist($user2);
+
+
+        //ajout de 5 participants
+        for($i=0; $i<10; $i++)
+        {
+            $user = new Participant();
+            $user->setNom('user' . $i);
+            $user->setPrenom($faker->firstName);
+            $user->setPseudo('pseudo' . $i);
+            $user->setMail('user'.$i.'@sortir.fr');
+            $user->setMotPasse($this->passwordHasher->hashPassword($user,'123456'));
+            $user->setTelephone(substr(preg_replace('/[^0-9]/', '', $faker->phoneNumber), 0, 10));
+            $user->setActif(true);
+            $user->setAdministrateur(false);
+            $campusRef = $faker->randomElement(['Niort', 'Nantes', 'Paris', 'La Roche s/Yon', 'Toulouse',]);
+            $user->setCampus($this->getReference($campusRef, Campus::class));
+            $this->addReference('participant_'.$i, $user );
+
+            $manager->persist($user);
+
+        }
+
+
 
 
         $manager->flush();
