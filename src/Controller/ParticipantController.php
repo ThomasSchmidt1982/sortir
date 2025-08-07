@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Participant;
 use App\Form\ParticipantType;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,18 +15,19 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class ParticipantController extends AbstractController
 {
 
-    #[Route('/afficher', name: 'participant_afficher', methods: ['GET'])]
-    public function show(ParticipantRepository $participantRepository):Response
+    #[Route('/participant/{id}', name: 'participant_affichage', requirements: ['id'=>'\d+'], methods: ['GET'])]
+    public function show(
+        $id,
+        ParticipantRepository $participantRepository
+    ):Response
     {
-        $participant = $participantRepository->find(32);
+        $participant = $participantRepository->find($id);
 
-        return $this->render('participant/show.html.twig', [
+        return $this->render('participant/affichage.html.twig', [
             "participant" => $participant,
         ]);
 
     }
-
-
 
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]

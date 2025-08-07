@@ -93,6 +93,13 @@ class SortieFixtures extends Fixture implements DependentFixtureInterface
             $organisateurRef = $faker->randomElement(['participant_0', 'participant_1', 'participant_2', 'participant_3', 'participant_4']);
             $sortie->setOrganisateur($this->getReference($organisateurRef, Participant::class));
 
+            // Ajout de participants inscrits aléatoires
+            $participantRefs = ['participant_0', 'participant_1', 'participant_2', 'participant_3', 'participant_4'];
+            foreach ($faker->randomElements($participantRefs, $faker->numberBetween(1, 3)) as $participantRef) {
+                $participant = $this->getReference($participantRef, Participant::class);
+                $sortie->addParticipant($participant); // Ajout du participant inscrit à la sortie
+            }
+
             $manager->persist($sortie);
         }
 

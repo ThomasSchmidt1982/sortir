@@ -12,3 +12,8 @@ footer {
     background-color: #fff;
     height: 2em;
 }
+ul {
+    list-style-type: none; /* Supprime les puces */
+    padding: 0; /* Retire les marges internes par défaut */
+    margin: 0; /* Retire les marges externes par défaut */
+}

@@ -12,14 +12,83 @@
         <select id="campus" name="campus" onchange="this.form.submit()">
             <option value="">--- Tous les campus ---</option>
             {% for campus in campusList %}
-                <option value="{{ campus.id }}" {% if campus.id == selectedCampus %}selected{% endif %}>
+                <option value="{{ campus.id }}" {% if campus.id == selectedFilters.campus %}selected{% endif %}>
                     {{ campus.nom }}
                 </option>
             {% endfor %}
         </select>
+
+        <ul class="list-group">
+           <li>
+               {# Champ caché pour transmettre "0" si la checkbox est décochée #}
+               <input type="hidden" name="showFinished" value="0">
+               {# Checkbox qui transmet "1" si cochée #}
+               <input
+                       type="checkbox"
+                       id="showFinished"
+                       name="showFinished"
+                       value="1"
+                       {% if selectedFilters.showFinished %}checked{% endif %}>
+               <label for="showFinished">Sorties terminées</label>
+           </li>
+
+            <li>
+                {# Champ caché pour transmettre "0" si la checkbox est décochée #}
+                <input type="hidden" name="showNotRegistered" value="0">
+                {# Checkbox qui transmet "1" si cochée #}
+                <input
+                        type="checkbox"
+                        id="showNotRegistered"
+                        name="showNotRegistered"
+                        value="1"
+                        {% if selectedFilters.showNotRegistered %}checked{% endif %}>
+                <label for="showNotRegistered">Sorties auxquelles je ne suis pas inscrit/e</label>
+            </li>
+
+            <li>
+                {# Champ caché pour transmettre "0" si la checkbox est décochée #}
+                <input type="hidden" name="showRegistered" value="0">
+                {# Checkbox qui transmet "1" si cochée #}
+                <input
+                        type="checkbox"
+                        id="showRegistered"
+                        name="showRegistered"
+                        value="1"
+                        {% if selectedFilters.showRegistered %}checked{% endif %}>
+                <label for="showRegistered">Sorties auxquelles je suis inscrit/e</label>
+            </li>
+
+            <li>
+                {# Champ caché pour transmettre "0" si la checkbox est décochée #}
+                <input type="hidden" name="showIOrganize" value="0">
+                {# Checkbox qui transmet "1" si cochée #}
+                <input
+                        type="checkbox"
+                        id="showIOrganize"
+                        name="showIOrganize"
+                        value="1"
+                        {% if selectedFilters.showIOrganize %}checked{% endif %}>
+                <label for="showIOrganize">Sorties dont je suis l'organisateur/trice</label>
+            </li>
+            <li>
+                <label for="searchTerm">Le nom de la sortie contient</label>
+                <input type="text" id="searchTerm" name="searchTerm" value="{{ selectedFilters.searchTerm }}" placeholder="Nom ou mot-clé">
+            </li>
+            <li>
+                <label for="startDate">Date de début :</label>
+                Entre ... <input type="date" id="startDate" name="startDate" value="{{ selectedFilters.startDate }}"> ... et ...
+                <label for="endDate">Date de fin :</label>
+                <input type="date" id="endDate" name="endDate" value="{{ selectedFilters.endDate }}">
+            </li>
+
+
+        </ul>
+
+        <button class="btn btn-secondary" type="submit">Rechercher</button>
+
     </form>
 
-    <table class="table table-bordered">
+    <table class="table table-hover">
         <thead>
         <tr>
             <th>Nom de la sortie</th>
@@ -43,7 +112,7 @@
                 <td>{% if user in sortie.participants %}X{% else %}{% endif %}</td>
                 <td>{{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</td>
                 <td>
-                    <a href=""></a>
+                    <a href="{{ path('sortie_affichage', {id: sortie.id}) }}" title="voir le détail de la sortie">Détails</a>
                 </td>
             </tr>
         {% endfor %}

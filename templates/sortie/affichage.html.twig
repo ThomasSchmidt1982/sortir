@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Afficher une sortie</h1>
+    <dl>
+        <dt>Nom de la sortie </dt>
+        <dd>{{ sortie.nom }}</dd>
+
+        <dt>Date et heure de la sortie</dt>
+        <dd>{{ sortie.dateHeureDebut|date('d/m/Y H:i') }}</dd>
+
+        <dt>Date limite d'inscription</dt>
+        <dd>{{ sortie.dateLimiteInscription|date('d/m/Y H:i')}}</dd>
+
+        <dt>Nombre de places</dt>
+        <dd>{{ sortie.nbInscriptionMax }}</dd>
+
+        <dt>Durée (en minutes)</dt>
+        <dd>{{ sortie.duree }}</dd>
+
+        <dt>Campus</dt>
+        <dd>{{ sortie.organisateur.campus.nom }}</dd>
+
+        <dt>Ville</dt>
+        <dd>{{ sortie.lieu.ville.nom }}</dd>
+
+        <dt>Lieu</dt>
+        <dd>{{ sortie.lieu.nom }}</dd>
+
+        <dt>Rue</dt>
+        <dd>{{ sortie.lieu.rue }}</dd>
+
+        <dt>Code Postal</dt>
+        <dd>{{ sortie.lieu.ville.codePostal }}</dd>
+
+        <dt>Latitude / Longitude</dt>
+        <dd>{{ sortie.lieu.latitude }} / {{ sortie.lieu.longitude }}</dd>
+
+        <dt>Descriptions et infos</dt>
+        <dd>{{ sortie.infosSortie }}</dd>
+
+    </dl>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Pseudo</th>
+            <th>Nom</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for participant in sortie.participants %}
+            <tr>
+                <td><a href="{{ path('participant_affichage', {id: participant.id}) }}"
+                       title="détails du participant">{{ participant.pseudo }}</a></td>
+                <td>{{ participant.prenom }} {{ participant.nom }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+{% block title %}
+Affichage d'un sortie | {{ parent() }}
+{% endblock %}
+
