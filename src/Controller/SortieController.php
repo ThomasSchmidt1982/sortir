@@ -18,6 +18,30 @@ use Symfony\Component\Routing\Attribute\Route;
 final class SortieController extends AbstractController
 {
 
+    #[Route('/sortie/desister', name: 'sortie_desister', methods: ['GET', 'POST'])]
+    public function desister(
+        Request $request,
+        SortieRepository $sortieRepository,
+        EntityManagerInterface $em,
+    ): Response {
+        // récup ID de la sortie depuis front
+        $sortieId = $request->request->get('sortie_id');
+        // recup sortie dans la bdd
+        $sortie = $sortieRepository->find($sortieId);
+
+        $user = $this->getUser();
+
+        // Ajouter l'utilisateur aux participants de la sortie
+        $sortie->removeParticipant($user);
+
+        // Sauvegarder les modifications en base
+        $em->flush();
+
+        // Message de confirmation
+        $this->addFlash('success', 'Vous vous êtes désinscrit avec succès.');
+
+        return $this->redirectToRoute('sortie_list');
+    }
 
     #[Route('/sortie/inscrire', name: 'sortie_inscrire', methods: ['GET', 'POST'])]
     public function inscrire(

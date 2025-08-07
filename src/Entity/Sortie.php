@@ -98,6 +98,22 @@ class Sortie
         return true;
     }
 
+    public function canUserWithdraw(Participant $user, \DateTimeImmutable $currentDateTime): bool
+    {
+        // Vérifier que l'état de la sortie est "Ouverte"
+        if (!$this->etat || $this->etat->getLibelle() !== 'Ouverte') {
+            return false;
+        }
+
+        // Vérifier que la date limite d'inscription n'est pas dépassée
+        if ($this->dateLimiteInscription && $this->dateLimiteInscription < $currentDateTime) {
+            return false;
+        }
+
+        // Vérifier que l'utilisateur est inscrit à la sortie
+        return $this->participants->contains($user);
+    }
+
     public function getId(): ?int
     {
         return $this->id;

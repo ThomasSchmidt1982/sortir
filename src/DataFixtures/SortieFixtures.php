@@ -69,21 +69,36 @@ class SortieFixtures extends Fixture implements DependentFixtureInterface
         $manager->persist($sortie2);
 */
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 25; $i++) {
             $sortie = new Sortie();
             // Définition des données aléatoires pour la sortie
             $sortie->setNom($faker->sentence(3)); // Nom aléatoire
-            $dateDebut = $faker->dateTimeBetween('-1 years', '+1 years');
-            $sortie->setDateHeureDebut(\DateTimeImmutable::createFromMutable($dateDebut));
-            $sortie->setDuree($faker->numberBetween(60, 240)); // Durée entre 1h et 4h
-            $dateLimit = $faker->dateTimeBetween($dateDebut, '+1 years');
-            $sortie->setDateLimiteInscription(\DateTimeImmutable::createFromMutable($dateLimit));
-            $sortie->setNbInscriptionMax($faker->numberBetween(10, 50)); // Max participants
-            $sortie->setInfosSortie($faker->text(200)); // Description
-
             // Récupération aléatoire d'un état défini dans EtatFixtures
             $etatRef = $faker->randomElement(['En création', 'Ouverte', 'Cloturée', 'En cours', 'Terminée', 'Annulée', 'Historisée' ]);
             $sortie->setEtat($this->getReference($etatRef, Etat::class));
+            if(in_array($etatRef, ['En création', 'Ouverte', 'Cloturée', 'Annulée'], true)){
+                $dateDebut = $faker->dateTimeBetween('now', '2 years');
+                $dateLimit = $faker->dateTimeBetween('now', $dateDebut);
+            }
+            if($etatRef === 'Terminée' ){
+                $dateDebut = $faker->dateTimeBetween('-2 years', '-1 day');
+                $dateLimit = $faker->dateTimeBetween('-2 years', $dateDebut);
+            }
+            if($etatRef === 'En cours' ){
+                $dateDebut = $faker->dateTimeBetween('now', '+2 years');
+                $dateLimit = $faker->dateTimeBetween('+1 month', $dateDebut);
+            }
+            if($etatRef === 'Historisée' ){
+                $dateDebut = $faker->dateTimeBetween('-2 years', '-1 month');
+                $dateLimit = $faker->dateTimeBetween($dateDebut, '-2 months ');
+            }
+            $sortie->setDateHeureDebut(\DateTimeImmutable::createFromMutable($dateDebut));
+            $sortie->setDateLimiteInscription(\DateTimeImmutable::createFromMutable($dateLimit));
+
+            $sortie->setDuree($faker->numberBetween(60, 240)); // Durée entre 1h et 4h
+            $sortie->setNbInscriptionMax($faker->numberBetween(10, 50)); // Max participants
+            $sortie->setInfosSortie($faker->text(200)); // Description
+
 
             // Récupération aléatoire d'un lieu défini dans LieuFixtures
             $lieuRef = $faker->randomElement(['lieu_don_ricardo', 'lieu_jimi_boy', 'lieu_criss_cross', 'lieu_little_italy', 'lieu_chez_georges', 'lieu_le_moulin_vert', 'lieu_café_du_cycliste', 'lieu_la_table_ronde', 'lieu_les_deux_tours', 'lieu_le_grand_bleu' ]);

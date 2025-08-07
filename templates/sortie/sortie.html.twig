@@ -134,6 +134,13 @@
                             <button type="submit" class="btn btn-outline-success btn-sm">S'inscrire</button>
                         </form>
                     {% endif %}
+                    {% if sortie.canUserWithdraw(user, currentDateTime) %}
+                        <form method="POST" action="{{ path('sortie_desister', {id: sortie.id}) }}">
+                            <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Se désister</button>
+                        </form>
+                    {% endif %}
+
                 </td>
             </tr>
         {% endfor %}
