@@ -110,13 +110,43 @@
                 <td>{{ sortie.participants|length }} / {{ sortie.nbInscriptionMax }}</td>
                 <td>{{ sortie.etat.libelle }}</td>
                 <td>{% if user in sortie.participants %}X{% else %}{% endif %}</td>
-                <td>{{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</td>
+                <td><a href="{{ path('participant_affichage', {id: sortie.organisateur.id} )}}">
+                        {{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</a></td>
                 <td>
-                    <a href="{{ path('sortie_affichage', {id: sortie.id}) }}" title="voir le détail de la sortie">Détails</a>
+                    <a href="{{ path('sortie_affichage', {id: sortie.id}) }}"
+                       class="btn btn-outline-primary btn-sm" title="voir le détail de la sortie">Afficher</a>
+
+                    {% if sortie.organisateur == app.user %}
+                        <form method="POST" action="{{ path('sortie_modifier') }}">
+                            <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Modifier</button>
+                        </form>
+                        {% if sortie.etat.libelle == 'En création' %}
+                            <form method="POST" action="{{ path('sortie_publier') }}">
+                                <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                                <button type="submit" class="btn btn-outline-warning btn-sm">Publier</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                    {% if sortie.isAvailable(user, currentDateTime) %}
+                        <form method="POST" action="{{ path('sortie_inscrire', {id: sortie.id}) }}">
+                            <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                            <button type="submit" class="btn btn-outline-success btn-sm">S'inscrire</button>
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    {# Si un user est connecté #}
+    {% if app.user %}
+        <div class="nav-item">
+            <a href="{{ path('sortie_creer') }}" class="btn btn-primary" title="créer une sortie">Créer une sortie</a>
+        </div>
+    {% else %}
+
+    {% endif %}
 
 {% endblock %}

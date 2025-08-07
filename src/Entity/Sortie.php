@@ -77,7 +77,26 @@ class Sortie
         $this->participants = new ArrayCollection();
     }
 
+    public function isAvailable(Participant $user, \DateTimeImmutable $currentDateTime): bool
+    {
+        // Vérifier que l'état est défini et qu'il est bien "Ouverte"
+        if (!$this->etat || $this->etat->getLibelle() !== 'Ouverte') {
+            return false;
+        }
 
+        // Vérifier que la date limite d'inscription n'est pas passée
+        if (!$this->dateLimiteInscription || $this->dateLimiteInscription < $currentDateTime) {
+            return false;
+        }
+
+        // Vérifier que l'utilisateur n'est pas déjà inscrit
+        if ($this->participants->contains($user)) {
+            return false;
+        }
+
+        // Toutes les conditions sont remplies, la sortie est disponible pour l'utilisateur
+        return true;
+    }
 
     public function getId(): ?int
     {

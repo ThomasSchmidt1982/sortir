@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Créer une sortie</h1>
+    {{ form_start(sortieForm) }}
+    {{ form_widget(sortieForm) }}
+
+    <button class="btn btn-primary">Enregistrer</button>
+
+    {{ form_end(sortieForm) }}
+
+    <form method="POST" action="{{ path('sortie_publier') }}">
+        <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+        <button type="submit" class="btn btn-danger">Publier</button>
+    </form>
+
+    <a href="{{ path('sortie_list') }}" class="btn btn-secondary">Retour à la liste</a>
+
+{% endblock %}
+
+{% block title %}
+Créer une sortie | {{ parent() }}
+{% endblock %}
+

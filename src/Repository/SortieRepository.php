@@ -67,9 +67,11 @@ class SortieRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('s'); // Alias pour Sortie
 
+
+        // Joindre l'état pour filtrer par libellé
+        $qb->join('s.etat', 'e');
         // Joindre l'organisateur pour les relations avec l'utilisateur connecté et potentiellement d'autres filtres
         $qb->join('s.organisateur', 'o');
-
 
         // Filtrer par campus uniquement si un ID est spécifié
         if (!empty($filters['campus'])) {
@@ -77,6 +79,12 @@ class SortieRepository extends ServiceEntityRepository
                 ->andWhere('c.id = :campusId')
                 ->setParameter('campusId', $filters['campus']);
         }
+
+        // Par défaut, exclure les sorties en état "En création" sauf si je suis l'organisateur
+        $qb->andWhere('e.libelle != :etatEnCreation OR s.organisateur = :currentUser')
+            ->setParameter('etatEnCreation', 'En création') // État à exclure sauf pour l'organisateur
+            ->setParameter('currentUser', $user);
+
 
         if(!empty($filters['showFinished'])){
             $qb->join('s.etat', 'e') // Joindre l'état des sorties
