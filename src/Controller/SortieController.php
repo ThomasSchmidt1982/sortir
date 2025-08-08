@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Etat;
 use App\Entity\Sortie;
+use App\Form\AnnulationType;
 use App\Form\SortieType;
 use App\Repository\CampusRepository;
 use App\Repository\EtatRepository;
@@ -18,6 +19,55 @@ use Symfony\Component\Routing\Attribute\Route;
 final class SortieController extends AbstractController
 {
 
+    #[Route('/sortie/annuler', name: 'sortie_annuler', methods: ['GET', 'POST'])]
+    public function annuler(
+        Request $request,
+        SortieRepository $sortieRepository,
+        EtatRepository $etatRepository,
+        EntityManagerInterface $em,
+    ): Response {
+        // récup ID de la sortie depuis front
+        $sortieId = $request->request->get('sortie_id');
+        $sortie = $sortieRepository->find($sortieId);
+        $etatOuverte = $etatRepository->findOneBy(['libelle' => 'Ouverte']);
+        $etatSortie = $sortie->getEtat();
+        $today = new \DateTimeImmutable();
+        $dateLimiteInscription = $sortie->getDateLimiteInscription();
+
+        if (!$sortie) {
+            $this->addFlash('error', 'Sortie introuvable.');
+            return $this->redirectToRoute('sortie_list');
+        }
+        if (!$sortieId) {
+            throw $this->createNotFoundException('L\'ID de la sortie est requis.');
+        }
+
+        // Création du formulaire
+        $annulerForm = $this->createForm(AnnulationType::class, $sortie);
+        $annulerForm->handleRequest($request);
+
+        if ($annulerForm->isSubmitted() && $annulerForm->isValid()) {
+            if ($dateLimiteInscription >= $today && $etatSortie === $etatOuverte) {
+                $sortie = $sortieRepository->find($sortieId);//recup l'état Annulée
+                $etatAnnulee = $etatRepository->findOneBy(['libelle' => 'Annulée']);// maj de l'état en "Annulée"
+                $sortie->setEtat($etatAnnulee);// sauvegarde des changement en bdd
+                $em->flush();
+
+                $this->addFlash("success", "la sortie a été annulée avec succès !");
+
+                return $this->redirectToRoute('sortie_list');
+            }
+        }
+
+        // Affichage du formulaire en cas de problème
+        return $this->render('sortie/annuler.html.twig', [
+            'annulerForm' => $annulerForm->createView(),
+            'sortie' => $sortie,
+        ]);
+
+    }
+
+
     #[Route('/sortie/desister', name: 'sortie_desister', methods: ['GET', 'POST'])]
     public function desister(
         Request $request,
@@ -31,17 +81,24 @@ final class SortieController extends AbstractController
 
         $user = $this->getUser();
 
-        // Ajouter l'utilisateur aux participants de la sortie
-        $sortie->removeParticipant($user);
 
-        // Sauvegarder les modifications en base
-        $em->flush();
+        // si la date cloture < aujourdhui (Possibilité de se désister jusqu'à l'heure de la sortie)
+        $today = new \DateTimeImmutable();
+        $dateLimiteInscription = $sortie->getDateLimiteInscription();
+        if($dateLimiteInscription >= $today) {
+            // enlever l'utilisateur aux participants de la sortie
+            $sortie->removeParticipant($user);
 
-        // Message de confirmation
-        $this->addFlash('success', 'Vous vous êtes désinscrit avec succès.');
+            // Sauvegarder les modifications en base
+            $em->flush();
+
+            // Message de confirmation
+            $this->addFlash('success', 'Vous vous êtes désinscrit avec succès.');
+        }
 
         return $this->redirectToRoute('sortie_list');
     }
+
 
     #[Route('/sortie/inscrire', name: 'sortie_inscrire', methods: ['GET', 'POST'])]
     public function inscrire(
@@ -104,7 +161,7 @@ final class SortieController extends AbstractController
 
         $sortieForm = $this->createForm(SortieType::class, $sortie);
         $sortieForm->handleRequest($request);
-
+// todo verifier si user est organisateur + redirect
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
             $em->flush();
             // Message de confirmation
@@ -145,6 +202,7 @@ final class SortieController extends AbstractController
 
         return $this->redirectToRoute('sortie_list');
     }
+
 
     #[Route('/sortie/creer', name: 'sortie_creer', methods: ['GET', 'POST'])]
     public function creer(
@@ -189,9 +247,17 @@ final class SortieController extends AbstractController
     {
         $sortie = $sortieRepository->find($id);
         $participant = $participantRepository->findAll();
+
+        // Créer le formulaire avec l'objet sortie
+        $sortieForm = $this->createForm(SortieType::class, $sortie, [
+            'disabled' => true // Désactiver les champs
+        ]);
+
+
         return $this->render('sortie/affichage.html.twig', [
             'sortie' => $sortie,
             'participant' => $participant,
+            'sortieForm' => $sortieForm->createView(),
         ]);
     }
 

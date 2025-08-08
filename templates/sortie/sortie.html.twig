@@ -88,7 +88,7 @@
 
     </form>
 
-    <table class="table table-hover">
+    <table class="table table-hover table-sm">
         <thead>
         <tr>
             <th>Nom de la sortie</th>
@@ -108,7 +108,11 @@
                 <td>{{ sortie.dateHeureDebut | date("d-m-Y") }}</td>
                 <td>{{ sortie.dateLimiteInscription | date("d-m-Y") }}</td>
                 <td>{{ sortie.participants|length }} / {{ sortie.nbInscriptionMax }}</td>
-                <td>{{ sortie.etat.libelle }}</td>
+                <td>{{ sortie.etat.libelle }}<br>
+                    {% if sortie.motifAnnulation  is not empty %}
+                        <i>Motif : {{ sortie.motifAnnulation }}</i>
+                    {% endif %}
+                </td>
                 <td>{% if user in sortie.participants %}X{% else %}{% endif %}</td>
                 <td><a href="{{ path('participant_affichage', {id: sortie.organisateur.id} )}}">
                         {{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</a></td>
@@ -121,6 +125,12 @@
                             <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">Modifier</button>
                         </form>
+                            {% if sortie.etat.libelle == 'Ouverte' %}
+                                <form method="POST" action="{{ path('sortie_annuler') }}">
+                                    <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Annuler</button>
+                                </form>
+                            {% endif %}
                         {% if sortie.etat.libelle == 'En création' %}
                             <form method="POST" action="{{ path('sortie_publier') }}">
                                 <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
@@ -140,7 +150,6 @@
                             <button type="submit" class="btn btn-outline-danger btn-sm">Se désister</button>
                         </form>
                     {% endif %}
-
                 </td>
             </tr>
         {% endfor %}

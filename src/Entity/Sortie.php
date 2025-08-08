@@ -51,7 +51,8 @@ class Sortie
         max: 2000,
         minMessage: "Le champ d'information doit avoir au moins {{ limit }} caractètres",
         maxMessage: "Le champ d'information doit avoir au maximum {{ limit }} caractères"
-    )]    #[ORM\Column(length: 2000, nullable: true)]
+    )]
+    #[ORM\Column(length: 2000, nullable: true)]
     private ?string $infosSortie = null;
 
     #[ORM\ManyToOne(inversedBy: 'sorties')]
@@ -71,6 +72,16 @@ class Sortie
     #[ORM\ManyToOne(inversedBy: 'organisateur')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Participant $organisateur = null;
+
+
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: "Le motif d'annulation doit avoir au moins {{ limit }} caractètres",
+        maxMessage: "Le motif d'annulation doit avoir au maximum {{ limit }} caractères"
+    )]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $motifAnnulation = null;
 
     public function __construct()
     {
@@ -250,6 +261,18 @@ class Sortie
     public function setOrganisateur(?Participant $organisateur): static
     {
         $this->organisateur = $organisateur;
+
+        return $this;
+    }
+
+    public function getMotifAnnulation(): ?string
+    {
+        return $this->motifAnnulation;
+    }
+
+    public function setMotifAnnulation(?string $motifAnnulation): static
+    {
+        $this->motifAnnulation = $motifAnnulation;
 
         return $this;
     }
