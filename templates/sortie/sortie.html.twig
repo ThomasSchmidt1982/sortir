@@ -113,9 +113,10 @@
                         <i>Motif : {{ sortie.motifAnnulation }}</i>
                     {% endif %}
                 </td>
-                <td>{% if user in sortie.participants %}X{% else %}{% endif %}</td>
+                <td>{% if user in sortie.participants %} X {% else %}{% endif %}</td>
                 <td><a href="{{ path('participant_affichage', {id: sortie.organisateur.id} )}}">
                         {{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</a></td>
+                {% if sortie.etat.libelle != 'Historisée' %}
                 <td>
                     <a href="{{ path('sortie_affichage', {id: sortie.id}) }}"
                        class="btn btn-outline-primary btn-sm" title="voir le détail de la sortie">Afficher</a>
@@ -151,6 +152,7 @@
                         </form>
                     {% endif %}
                 </td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>

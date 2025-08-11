@@ -2,18 +2,63 @@
 
 namespace App\Repository;
 
+use App\Entity\Etat;
 use App\Entity\Sortie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Sortie>
- */
 class SortieRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $em)
     {
         parent::__construct($registry, Sortie::class);
+        $this->em = $em;
+    }
+
+    public function updateEtatSortieDate(): void
+    {
+        $today = new \DateTimeImmutable();
+
+        // 1. Récupérer l'état « Ouverte » et « Cloturée »
+        $etatOuverte = $this->getEntityManager()
+            ->getRepository(Etat::class)
+            ->findOneBy(['libelle' => 'Ouverte']);
+
+        $etatCloturee = $this->getEntityManager()
+            ->getRepository(Etat::class)
+            ->findOneBy(['libelle' => 'Cloturée']);
+
+        // 2. Réouvrir les sorties « Cloturée » si la date limite d'inscription est repoussée
+        $sortiesCloturees = $this->createQueryBuilder('s')
+            ->join('s.etat', 'e')
+            ->andWhere('e.libelle = :cloturee')
+            ->andWhere('s.dateLimiteInscription >= :today') // Si date limite est dans le futur
+            ->setParameter('cloturee', 'Cloturée')
+            ->setParameter('today', $today)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($sortiesCloturees as $sortie) {
+            $sortie->setEtat($etatOuverte); // Réouverture
+        }
+
+        // 3. Clôturer les sorties « Ouverte » si la date limite d'inscription est dépassée
+        $sortiesOuvertes = $this->createQueryBuilder('s')
+            ->join('s.etat', 'e')
+            ->andWhere('e.libelle = :ouverte')
+            ->andWhere('s.dateLimiteInscription < :today') // Si date limite est dépassée
+            ->setParameter('ouverte', 'Ouverte')
+            ->setParameter('today', $today)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($sortiesOuvertes as $sortie) {
+            $sortie->setEtat($etatCloturee); // Clôture
+        }
+
+        // 4. Appliquer tous les changements
+        $this->getEntityManager()->flush();
     }
 
     public function findByCampusOrganisateur(int $campusId): array
@@ -39,30 +84,6 @@ class SortieRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    //    /**
-    //     * @return Sortie[] Returns an array of Sortie objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Sortie
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
     public function findByFilters(array $filters, $user): array
     {
         $qb = $this->createQueryBuilder('s'); // Alias pour Sortie
@@ -142,5 +163,53 @@ class SortieRepository extends ServiceEntityRepository
         // Retourner les résultats
         return $qb->getQuery()->getResult();
     }
+
+    public function findSortiesAHistoriser(\DateTimeImmutable $date): array
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.etat', 'e')
+            ->andWhere('s.dateHeureDebut < :date')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findNbParticipant(int $sortieId): int
+    {
+        return $this->createQueryBuilder('s')
+            ->select('COUNT(p.id)') // Compter le nombre de participants
+            ->join('s.participants', 'p') // Faire la jointure avec les participants
+            ->where('s.id = :sortieId') // Filtrer par l'ID de la sortie
+            ->setParameter('sortieId', $sortieId) // Assigner la valeur de sortie
+            ->getQuery()
+            ->getSingleScalarResult(); // Retourner le nombre de participants
+    }
+
+
+
+    //    /**
+    //     * @return Sortie[] Returns an array of Sortie objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('s.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Sortie
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 
 }

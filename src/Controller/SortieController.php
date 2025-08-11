@@ -10,6 +10,7 @@ use App\Repository\CampusRepository;
 use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
+use App\Service\SortieService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,7 @@ final class SortieController extends AbstractController
         SortieRepository $sortieRepository,
         EtatRepository $etatRepository,
         EntityManagerInterface $em,
+        SortieService $sortieService,
     ): Response {
         // récup ID de la sortie depuis front
         $sortieId = $request->request->get('sortie_id');
@@ -48,11 +50,7 @@ final class SortieController extends AbstractController
 
         if ($annulerForm->isSubmitted() && $annulerForm->isValid()) {
             if ($dateLimiteInscription >= $today && $etatSortie === $etatOuverte) {
-                $sortie = $sortieRepository->find($sortieId);//recup l'état Annulée
-                $etatAnnulee = $etatRepository->findOneBy(['libelle' => 'Annulée']);// maj de l'état en "Annulée"
-                $sortie->setEtat($etatAnnulee);// sauvegarde des changement en bdd
-                $em->flush();
-
+                $sortieService->setEtatAnnulee($sortie);
                 $this->addFlash("success", "la sortie a été annulée avec succès !");
 
                 return $this->redirectToRoute('sortie_list');
@@ -104,18 +102,19 @@ final class SortieController extends AbstractController
     public function inscrire(
         Request $request,
         SortieRepository $sortieRepository,
+        EtatRepository $etatRepository,
         EntityManagerInterface $em,
     ): Response {
+        // update des etats si nb inscris >= nb inscriptions
+        $sortieRepository->updateEtatSortie();
         // récup ID de la sortie depuis front
         $sortieId = $request->request->get('sortie_id');
         // recup sortie dans la bdd
         $sortie = $sortieRepository->find($sortieId);
 
         $user = $this->getUser();
-
         // Ajouter l'utilisateur aux participants de la sortie
         $sortie->addParticipant($user);
-
         // Sauvegarder les modifications en base
         $em->flush();
 
@@ -180,8 +179,7 @@ final class SortieController extends AbstractController
     public function publier(
         Request $request,
         SortieRepository $sortieRepository,
-        EtatRepository $etatRepository,
-        EntityManagerInterface $em,
+        SortieService $sortieService,
     ): Response {
         // récup ID de la sortie depuis front
         $sortieId = $request->request->get('sortie_id');
@@ -191,13 +189,7 @@ final class SortieController extends AbstractController
         }
 
         $sortie = $sortieRepository->find($sortieId);
-        //recup l'état ouverte
-        $etatOuverte = $etatRepository->findOneBy(['libelle' => 'Ouverte']);
-        // maj de l'état en "Ouverte"
-        $sortie->setEtat($etatOuverte);
-        // sauvegarde des changement en bdd
-        $em->flush();
-
+        $sortieService->setEtatOuverte($sortie);
         $this->addFlash("success", "la sortie a été publiée avec succès !");
 
         return $this->redirectToRoute('sortie_list');
@@ -210,6 +202,7 @@ final class SortieController extends AbstractController
         CampusRepository $campusRepository,
         ParticipantRepository $participantRepository,
         EntityManagerInterface $em,
+        SortieService $sortieService,
     ): Response{
 
         //créé une instance de Sortie
@@ -220,7 +213,7 @@ final class SortieController extends AbstractController
         $sortieForm->handleRequest($request);
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
             // defini l'état
-            $sortie->setEtat($em->getRepository(Etat::class)->findOneBy(['libelle' => 'En création']));
+            $sortieService->setEtatEnCreation($sortie);
             // defini l'organisateur est le user connecté
             $sortie->setOrganisateur($user=$this->getUser());
             $em->persist($sortie);
@@ -267,8 +260,17 @@ final class SortieController extends AbstractController
         Request          $request,
         SortieRepository $sortieRepository,
         CampusRepository $campusRepository,
+        SortieService    $sortieService,
     ): Response
     {
+        // update des etats ouverte->Cloturée des sorties
+        $sortieRepository->updateEtatSortieDate();
+        // update des etats si inscriptions > NBplaces
+        $sortieService->cloturerNbParticipants();
+        // historiser les sorties de plus d'un mois
+        $sortieService->historiserSorties();
+        //
+
         // récup l'utilisateur connecté
         $user = $this->getuser();
         if (!$user) {
@@ -295,6 +297,8 @@ final class SortieController extends AbstractController
         ];
 
         $sorties = $sortieRepository->findByFilters($filters, $user);
+
+
 
         return $this->render('sortie/sortie.html.twig', [
             'sorties' => $sorties,

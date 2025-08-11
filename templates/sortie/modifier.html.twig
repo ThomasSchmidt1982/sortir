@@ -12,10 +12,12 @@
 
     <div class="d-flex justify-content-start gap-2 mt-3">
 
+        {% if sortie.etat.libelle == 'En création' %}
         <form method="POST" action="{{ path('sortie_publier') }}">
             <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
             <button type="submit" class="btn btn-outline-warning">Publier</button>
         </form>
+        {% endif %}
 
         <form method="POST" action="{{ path('sortie_supprimer') }}">
             <input type="hidden" name="sortie_id" value="{{ sortie.id }}">

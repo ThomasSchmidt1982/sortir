@@ -45,6 +45,7 @@ class ParticipantType extends AbstractType
             ->add('campus', EntityType::class, [
                 'class' => Campus::class,
                 'choice_label' => 'nom',
+                'disabled' => true, // Rendre le champ non modifiable
             ])
             ->add('btnCreate', SubmitType::class, [
                 'label' => 'Modifier',
