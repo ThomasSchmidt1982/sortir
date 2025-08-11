@@ -111,13 +111,14 @@ class Sortie
 
     public function canUserWithdraw(Participant $user, \DateTimeImmutable $currentDateTime): bool
     {
-        // Vérifier que l'état de la sortie est "Ouverte"
-        if (!$this->etat || $this->etat->getLibelle() !== 'Ouverte') {
+        $etatsInterdits = ['Annulée', 'En création', 'En Cours', 'Terminée', 'Historisée'];
+
+        if ($this->etat && in_array($this->etat->getLibelle(), $etatsInterdits, true)) {
             return false;
         }
 
         // Vérifier que la date limite d'inscription n'est pas dépassée
-        if ($this->dateLimiteInscription && $this->dateLimiteInscription < $currentDateTime) {
+        if ($this->dateHeureDebut && $this->dateHeureDebut < $currentDateTime) {
             return false;
         }
 

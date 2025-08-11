@@ -102,11 +102,11 @@ final class SortieController extends AbstractController
     public function inscrire(
         Request $request,
         SortieRepository $sortieRepository,
-        EtatRepository $etatRepository,
+        SortieService $sortieService,
         EntityManagerInterface $em,
     ): Response {
-        // update des etats si nb inscris >= nb inscriptions
-        $sortieRepository->updateEtatSortie();
+        // update des etats si inscriptions > NBplaces et/ou date limite dépassée
+        $sortieService->cloturerSorties();
         // récup ID de la sortie depuis front
         $sortieId = $request->request->get('sortie_id');
         // recup sortie dans la bdd
@@ -162,10 +162,12 @@ final class SortieController extends AbstractController
         $sortieForm->handleRequest($request);
 // todo verifier si user est organisateur + redirect
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
+
+
+
             $em->flush();
             // Message de confirmation
             $this->addFlash('success', 'La sortie a été modifiée avec succès.');
-
             return $this->redirectToRoute('sortie_list');
         }
         return $this->render('sortie/modifier.html.twig', [
@@ -264,12 +266,14 @@ final class SortieController extends AbstractController
     ): Response
     {
         // update des etats ouverte->Cloturée des sorties
-        $sortieRepository->updateEtatSortieDate();
-        // update des etats si inscriptions > NBplaces
-        $sortieService->cloturerNbParticipants();
+         $sortieRepository->updateEtatSortieDate();
+        // Terminer les sorties entre hier et moins d'un mois
+        $sortieService->terminerSorties();
+        // update des etats si inscriptions > NBplaces et/ou date limite dépassée
+        $sortieService->cloturerSorties();
         // historiser les sorties de plus d'un mois
         $sortieService->historiserSorties();
-        //
+
 
         // récup l'utilisateur connecté
         $user = $this->getuser();
@@ -297,6 +301,12 @@ final class SortieController extends AbstractController
         ];
 
         $sorties = $sortieRepository->findByFilters($filters, $user);
+        /***/
+
+
+
+
+         /***/
 
 
 

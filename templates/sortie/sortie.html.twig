@@ -8,160 +8,171 @@
 
     {# Selection du filtre par Campus #}
     <form method="post" action="{{ path('sortie_list') }}">
-        <label for="campus">Campus :</label>
-        <select id="campus" name="campus" onchange="this.form.submit()">
-            <option value="">--- Tous les campus ---</option>
-            {% for campus in campusList %}
-                <option value="{{ campus.id }}" {% if campus.id == selectedFilters.campus %}selected{% endif %}>
-                    {{ campus.nom }}
-                </option>
-            {% endfor %}
-        </select>
+        <div class="mb-3">
+            <label for="campus">Campus :</label>
+            <select class="form-select" id="campus" name="campus" onchange="this.form.submit()">
+                <option value="">--- Tous les campus ---</option>
+                {% for campus in campusList %}
+                    <option value="{{ campus.id }}" {% if campus.id == selectedFilters.campus %}selected{% endif %}>
+                        {{ campus.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <ul class="list-group">
-           <li>
-               {# Champ caché pour transmettre "0" si la checkbox est décochée #}
-               <input type="hidden" name="showFinished" value="0">
-               {# Checkbox qui transmet "1" si cochée #}
-               <input
-                       type="checkbox"
-                       id="showFinished"
-                       name="showFinished"
-                       value="1"
-                       {% if selectedFilters.showFinished %}checked{% endif %}>
-               <label for="showFinished">Sorties terminées</label>
-           </li>
 
-            <li>
+        <div class="form-check mb-3">
+            {# Champ caché pour transmettre "0" si la checkbox est décochée #}
+            <input type="hidden" name="showFinished" value="0">
+            {# Checkbox qui transmet "1" si cochée #}
+            <input  class="form-check-input"
+                    type="checkbox"
+                    id="showFinished"
+                    name="showFinished"
+                    value="1"
+                    {% if selectedFilters.showFinished %}checked{% endif %}>
+            <label class="form-check-label" for="showFinished">Sorties terminées</label>
+        </div>
+
+        <div class="form-check mb-3">
                 {# Champ caché pour transmettre "0" si la checkbox est décochée #}
                 <input type="hidden" name="showNotRegistered" value="0">
                 {# Checkbox qui transmet "1" si cochée #}
-                <input
-                        type="checkbox"
+                <input class="form-check-input"
+                       type="checkbox"
                         id="showNotRegistered"
                         name="showNotRegistered"
                         value="1"
                         {% if selectedFilters.showNotRegistered %}checked{% endif %}>
-                <label for="showNotRegistered">Sorties auxquelles je ne suis pas inscrit/e</label>
-            </li>
+                <label  class="form-check-label" for="showNotRegistered">Sorties où je ne me suis pas inscrit/e</label>
+        </div>
 
-            <li>
+        <div class="form-check mb-3">
                 {# Champ caché pour transmettre "0" si la checkbox est décochée #}
                 <input type="hidden" name="showRegistered" value="0">
                 {# Checkbox qui transmet "1" si cochée #}
-                <input
-                        type="checkbox"
+                <input class="form-check-input"
+                       type="checkbox"
                         id="showRegistered"
                         name="showRegistered"
                         value="1"
                         {% if selectedFilters.showRegistered %}checked{% endif %}>
-                <label for="showRegistered">Sorties auxquelles je suis inscrit/e</label>
-            </li>
+                <label  class="form-check-label" for="showRegistered">Sorties auxquelles je suis inscrit/e</label>
+        </div>
 
-            <li>
+        <div class="form-check mb-3">
                 {# Champ caché pour transmettre "0" si la checkbox est décochée #}
                 <input type="hidden" name="showIOrganize" value="0">
                 {# Checkbox qui transmet "1" si cochée #}
-                <input
-                        type="checkbox"
+                <input class="form-check-input"
+                       type="checkbox"
                         id="showIOrganize"
                         name="showIOrganize"
                         value="1"
                         {% if selectedFilters.showIOrganize %}checked{% endif %}>
-                <label for="showIOrganize">Sorties dont je suis l'organisateur/trice</label>
-            </li>
-            <li>
-                <label for="searchTerm">Le nom de la sortie contient</label>
-                <input type="text" id="searchTerm" name="searchTerm" value="{{ selectedFilters.searchTerm }}" placeholder="Nom ou mot-clé">
-            </li>
-            <li>
-                <label for="startDate">Date de début :</label>
-                Entre ... <input type="date" id="startDate" name="startDate" value="{{ selectedFilters.startDate }}"> ... et ...
-                <label for="endDate">Date de fin :</label>
-                <input type="date" id="endDate" name="endDate" value="{{ selectedFilters.endDate }}">
-            </li>
+                <label  class="form-check-label" for="showIOrganize">Sorties dont je suis l'organisateur/trice</label>
+        </div>
+
+        <div class="mb-3">
+        <label for="searchTerm" class="form-label">Le nom de la sortie contient</label>
+                <input class="form-control" type="text" id="searchTerm" name="searchTerm" value="{{ selectedFilters.searchTerm }}" placeholder="Nom ou mot-clé">
+        </div>
+        <div class="mb-3">
+        <label  class="form-label" for="startDate">Date de début :</label>
+                <input  class="form-control" type="date" id="startDate" name="startDate" value="{{ selectedFilters.startDate }}">
+                <label  class="form-label" for="endDate">Date de fin :</label>
+                <input  class="form-control" type="date" id="endDate" name="endDate" value="{{ selectedFilters.endDate }}">
+        </div>
 
 
-        </ul>
+        <button class="btn btn-info" type="submit">Rechercher</button>
 
-        <button class="btn btn-secondary" type="submit">Rechercher</button>
 
     </form>
 
-    <table class="table table-hover table-sm">
-        <thead>
-        <tr>
-            <th>Nom de la sortie</th>
-            <th>Date de la sortie</th>
-            <th>Clôture</th>
-            <th>Inscrits/Places</th>
-            <th>Etat</th>
-            <th>Inscrit</th>
-            <th>Organisateur</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for sortie in sorties %}
+    <div class="table-responsive">
+        <table class="table table-hover table-sm">
+            <thead>
             <tr>
-                <td>{{ sortie.nom }}</td>
-                <td>{{ sortie.dateHeureDebut | date("d-m-Y") }}</td>
-                <td>{{ sortie.dateLimiteInscription | date("d-m-Y") }}</td>
-                <td>{{ sortie.participants|length }} / {{ sortie.nbInscriptionMax }}</td>
-                <td>{{ sortie.etat.libelle }}<br>
-                    {% if sortie.motifAnnulation  is not empty %}
-                        <i>Motif : {{ sortie.motifAnnulation }}</i>
-                    {% endif %}
-                </td>
-                <td>{% if user in sortie.participants %} X {% else %}{% endif %}</td>
-                <td><a href="{{ path('participant_affichage', {id: sortie.organisateur.id} )}}">
-                        {{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</a></td>
-                {% if sortie.etat.libelle != 'Historisée' %}
-                <td>
-                    <a href="{{ path('sortie_affichage', {id: sortie.id}) }}"
-                       class="btn btn-outline-primary btn-sm" title="voir le détail de la sortie">Afficher</a>
+                <th>Nom de la sortie</th>
+                <th>Date de la sortie</th>
+                <th class="d-none d-md-table-cell">
+                    Clôture</th>
+                <th class="d-none d-md-table-cell">
+                    Inscrits/Places</th>
+                <th class="d-none d-md-table-cell">
+                    Etat</th>
+                <th class="d-none d-md-table-cell">
+                    Inscrit</th>
+                <th class="d-none d-md-table-cell">
+                    Organisateur</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for sortie in sorties %}
+                <tr>
+                    <td>{{ sortie.nom }}</td>
+                    <td>{{ sortie.dateHeureDebut | date("d-m-Y") }}</td>
+                    <td class="d-none d-md-table-cell">{{ sortie.dateLimiteInscription | date("d-m-Y") }}</td>
+                    <td class="d-none d-md-table-cell">{{ sortie.participants|length }} / {{ sortie.nbInscriptionMax }}</td>
+                    <td class="d-none d-md-table-cell">{{ sortie.etat.libelle }}<br>
+                        {% if sortie.motifAnnulation  is not empty %}
+                            <i>Motif : {{ sortie.motifAnnulation }}</i>
+                        {% endif %}
+                    </td>
+                    <td class="d-none d-md-table-cell">{% if user in sortie.participants %} X {% else %}{% endif %}</td>
+                    <td class="d-none d-md-table-cell">
+                        <a class="btn btn-outline-dark btn-sm btn-custom-size" href="{{ path('participant_affichage', {id: sortie.organisateur.id} )}}">
+                            {{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</a></td>
+                    {% if sortie.etat.libelle != 'Historisée' %}
+                        <td>
+                            <a href="{{ path('sortie_affichage', {id: sortie.id}) }}"
+                               class="btn btn-outline-dark btn-sm btn-custom-size" title="voir le détail de la sortie">Afficher</a>
 
-                    {% if sortie.organisateur == app.user %}
-                        <form method="POST" action="{{ path('sortie_modifier') }}">
-                            <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Modifier</button>
-                        </form>
-                            {% if sortie.etat.libelle == 'Ouverte' %}
-                                <form method="POST" action="{{ path('sortie_annuler') }}">
+                            {% if sortie.organisateur == app.user %}
+                                <form method="POST" action="{{ path('sortie_modifier') }}">
                                     <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">Annuler</button>
+                                    <button type="submit" class="btn btn-outline-warning btn-sm btn-custom-size">Modifier</button>
+                                </form>
+                                {% if sortie.etat.libelle == 'Ouverte' %}
+                                    <form method="POST" action="{{ path('sortie_annuler') }}">
+                                        <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm btn-custom-size">Annuler</button>
+                                    </form>
+                                {% endif %}
+                                {% if sortie.etat.libelle == 'En création' %}
+                                    <form method="POST" action="{{ path('sortie_publier') }}">
+                                        <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                                        <button type="submit" class="btn btn-outline-warning btn-sm btn-custom-size">Publier</button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                            {% if sortie.isAvailable(user, currentDateTime) %}
+                                <form method="POST" action="{{ path('sortie_inscrire', {id: sortie.id}) }}">
+                                    <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm btn-custom-size">S'inscrire</button>
                                 </form>
                             {% endif %}
-                        {% if sortie.etat.libelle == 'En création' %}
-                            <form method="POST" action="{{ path('sortie_publier') }}">
-                                <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                <button type="submit" class="btn btn-outline-warning btn-sm">Publier</button>
-                            </form>
-                        {% endif %}
+                            {% if sortie.canUserWithdraw(user, currentDateTime) %}
+                                <form method="POST" action="{{ path('sortie_desister', {id: sortie.id}) }}">
+                                    <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
+                                    <button type="submit" class="btn btn-outline-info btn-sm btn-custom-size">Se désister</button>
+                                </form>
+                            {% endif %}
+                        </td>
                     {% endif %}
-                    {% if sortie.isAvailable(user, currentDateTime) %}
-                        <form method="POST" action="{{ path('sortie_inscrire', {id: sortie.id}) }}">
-                            <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                            <button type="submit" class="btn btn-outline-success btn-sm">S'inscrire</button>
-                        </form>
-                    {% endif %}
-                    {% if sortie.canUserWithdraw(user, currentDateTime) %}
-                        <form method="POST" action="{{ path('sortie_desister', {id: sortie.id}) }}">
-                            <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Se désister</button>
-                        </form>
-                    {% endif %}
-                </td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 
     {# Si un user est connecté #}
     {% if app.user %}
         <div class="nav-item">
-            <a href="{{ path('sortie_creer') }}" class="btn btn-primary" title="créer une sortie">Créer une sortie</a>
+            <a href="{{ path('sortie_creer') }}" class="btn btn-info" title="créer une sortie">Créer une sortie</a>
         </div>
     {% else %}
 

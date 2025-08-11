@@ -86,81 +86,64 @@ class SortieRepository extends ServiceEntityRepository
 
     public function findByFilters(array $filters, $user): array
     {
-        $qb = $this->createQueryBuilder('s'); // Alias pour Sortie
+        $qb = $this->createQueryBuilder('s'); // Alias pour la table Sortie
 
+        // Joindre les entités nécessaires
+        $qb->join('s.etat', 'etat')
+            ->join('s.organisateur', 'organisateur')
+            ->leftJoin('organisateur.campus', 'campus'); // Jointure avec Campus pour les filtres liés au campus
 
-        // Joindre l'état pour filtrer par libellé
-        $qb->join('s.etat', 'e');
-        // Joindre l'organisateur pour les relations avec l'utilisateur connecté et potentiellement d'autres filtres
-        $qb->join('s.organisateur', 'o');
-
-        // Filtrer par campus uniquement si un ID est spécifié
+        // 1. Filtre par campus
         if (!empty($filters['campus'])) {
-            $qb->join('o.campus', 'c')
-                ->andWhere('c.id = :campusId')
+            $qb->andWhere('campus.id = :campusId')
                 ->setParameter('campusId', $filters['campus']);
         }
 
-        // Par défaut, exclure les sorties en état "En création" sauf si je suis l'organisateur
-        $qb->andWhere('e.libelle != :etatEnCreation OR s.organisateur = :currentUser')
-            ->setParameter('etatEnCreation', 'En création') // État à exclure sauf pour l'organisateur
-            ->setParameter('currentUser', $user);
-
-
-        if(!empty($filters['showFinished'])){
-            $qb->join('s.etat', 'e') // Joindre l'état des sorties
-            ->andWhere('e.libelle IN (:includedStates)')
-                ->setParameter('includedStates', ['Terminée']);
-        }
-
-        // Exclure les sorties auxquelles l'utilisateur est déjà inscrit si "showNotRegistered" est activé
-        if (!empty($filters['showNotRegistered'])) {
-            $qb->andWhere(':currentUser NOT MEMBER OF s.participants') // Utilisateur non inscrit
-            ->setParameter('currentUser', $user);
-        }
-
-        // Inclure uniquement les sorties auxquelles l'utilisateur est  inscrit si "showNotRegistered" est activé
-        if (!empty($filters['showRegistered'])) {
-            $qb->andWhere(':currentUser MEMBER OF s.participants') // Utilisateur inscrit
-            ->setParameter('currentUser', $user);
-        }
-
-        // Inclure uniquement les sorties dont je sui l'organisateur si "showIOrganize" est activé
-        if (!empty($filters['showIOrganize'])) {
-            $qb->andWhere('s.organisateur = :currentUser')
-                ->setParameter('currentUser', $user);
-        }
-
-        // recherche les sorties qui contiennent
+        // 2. Filtre par mot-clé (nom de sortie)
         if (!empty($filters['searchTerm'])) {
             $qb->andWhere('s.nom LIKE :searchTerm')
                 ->setParameter('searchTerm', '%' . $filters['searchTerm'] . '%');
         }
 
-        /* // Filtrer par date de début
+        // 3. Filtre par plages de dates (début et fin)
         if (!empty($filters['startDate'])) {
             $qb->andWhere('s.dateHeureDebut >= :startDate')
-                ->setParameter('startDate', new \DateTime($filters['startDate']));
+                ->setParameter('startDate', new \DateTimeImmutable($filters['startDate']));
         }
 
-        // Filtrer par date de fin
         if (!empty($filters['endDate'])) {
             $qb->andWhere('s.dateHeureDebut <= :endDate')
-                ->setParameter('endDate', new \DateTime($filters['endDate']));
-        } */
-
-        // Filtrer par plage de dates (bornes)
-        if (!empty($filters['startDate']) && !empty($filters['endDate'])) {
-            $qb->andWhere('s.dateHeureDebut BETWEEN :startDate AND :endDate')
-                ->setParameter('startDate', new \DateTime($filters['startDate']))
-                ->setParameter('endDate', new \DateTime($filters['endDate']));
+                ->setParameter('endDate', new \DateTimeImmutable($filters['endDate']));
         }
 
+        // 4. Inclure les sorties terminées (checkbox cochée)
+        if (!empty($filters['showFinished'])) {
+            $qb->andWhere('etat.libelle = :finished')
+                ->setParameter('finished', 'Terminée');
+        }
 
-        // Trier les résultats par date de début décroissante (facultatif, peut varier selon le besoin)
+        // 5. Exclure les sorties auxquelles l'utilisateur est inscrit (checkbox cochée)
+        if (!empty($filters['showNotRegistered'])) {
+            $qb->andWhere(':currentUser NOT MEMBER OF s.participants')
+                ->setParameter('currentUser', $user);
+        }
+
+        // 6. Inclure uniquement les sorties où l'utilisateur est inscrit (checkbox cochée)
+        if (!empty($filters['showRegistered'])) {
+            $qb->andWhere(':currentUser MEMBER OF s.participants')
+                ->setParameter('currentUser', $user);
+        }
+
+        // 7. Inclure uniquement les sorties où l'utilisateur est l'organisateur (checkbox cochée)
+        if (!empty($filters['showIOrganize'])) {
+            $qb->andWhere('s.organisateur = :currentUser')
+                ->setParameter('currentUser', $user);
+        }
+
+        // Trier par date de début décroissante
         $qb->orderBy('s.dateHeureDebut', 'DESC');
 
-        // Retourner les résultats
+        // Retourner les résultats sous forme de tableau
         return $qb->getQuery()->getResult();
     }
 
@@ -169,10 +152,27 @@ class SortieRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('s')
             ->join('s.etat', 'e')
             ->andWhere('s.dateHeureDebut < :date')
+            ->andWhere('e.libelle != :etatHistorisee') // On exclut celles déjà "Historisée"
             ->setParameter('date', $date)
+            ->setParameter('etatHistorisee', 'Historisée')
             ->getQuery()
             ->getResult();
     }
+
+    public function findSortiesATerminer(\DateTimeImmutable $dateDepuisUnMois, \DateTimeImmutable $datedHier): array
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.etat', 'e')
+            ->andWhere('s.dateHeureDebut < :datedHier')
+            ->andWhere('s.dateHeureDebut > :dateDepuisUnMois')
+            ->andWhere('e.libelle != :etatTerminee') // On exclut celles déjà "Terminée"
+            ->setParameter('datedHier', $datedHier)
+            ->setParameter('dateDepuisUnMois', $dateDepuisUnMois)
+            ->setParameter('etatTerminee', 'Terminée')
+            ->getQuery()
+            ->getResult();
+    }
+
 
     public function findNbParticipant(int $sortieId): int
     {
@@ -185,6 +185,19 @@ class SortieRepository extends ServiceEntityRepository
             ->getSingleScalarResult(); // Retourner le nombre de participants
     }
 
+    public function findSortiesACloturer(\DateTimeImmutable $currentDate): array
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.etat', 'e') // Join les états
+            ->leftJoin('s.participants', 'p') // Join les participants pour compter leurs inscriptions
+            ->andWhere('e.libelle IN (:etats)')
+            ->setParameter('etats', ['Ouverte'])
+            ->andWhere('s.dateLimiteInscription < :currentDate OR SIZE(s.participants) >= s.nbInscriptionMax')
+            ->setParameter('currentDate', $currentDate) // Date actuelle
+            ->groupBy('s.id') // Nécessaire pour groupes lors des jointures avec COUNT ou SIZE
+            ->getQuery()
+            ->getResult();
+    }
 
 
     //    /**

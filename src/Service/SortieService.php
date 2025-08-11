@@ -72,15 +72,42 @@ class SortieService
         $dateDepuisUnMois = new \DateTimeImmutable('-1 month');
         // Récupérer les sorties éligibles
         $sortiesAHistoriser = $this->sortieRepository->findSortiesAHistoriser($dateDepuisUnMois);
-        // Mettre à jour l'état des sorties
-        foreach ($sortiesAHistoriser as $sortie) {
-            $this->setEtatHistorisee($sortie);
+        if ($sortiesAHistoriser) { // Mettre à jour l'état des sorties
+            foreach ($sortiesAHistoriser as $sortie) {
+                $this->setEtatHistorisee($sortie);
+            }
+            $this->em->flush();
         }
-
     }
 
-    public function cloturerNbParticipants():void
+    public function terminerSorties():void
     {
+        // Calculer la date limite : aujourd'hui moins 1 mois
+        $dateDepuisUnMois = new \DateTimeImmutable('-1 month');
+        $dateDHier = new \DateTimeImmutable('-1 day');
+        // Récupérer les sorties éligibles
+        $sortiesATerminer = $this->sortieRepository->findSortiesATerminer($dateDepuisUnMois, $dateDHier);
+        if ($sortiesATerminer) { // Mettre à jour l'état des sorties
+            foreach ($sortiesATerminer as $sortie) {
+                $this->setEtatTerminee($sortie);
+            }
+            $this->em->flush();
+        }
+    }
+
+    public function cloturerSorties():void
+    {
+        $currentDate = new \DateTimeImmutable('now');
+        // filtrage date dépassé ou nb participant atteint
+        $sortiesACloturer = $this->sortieRepository->findSortiesACloturer($currentDate);
+
+        if ($sortiesACloturer) {
+            foreach ($sortiesACloturer as $sortie) {
+                $this->setEtatCloturee($sortie);
+            }
+            $this->em->flush();
+
+        }
 
     }
 
