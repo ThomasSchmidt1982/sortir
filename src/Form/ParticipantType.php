@@ -8,6 +8,7 @@ use App\Entity\Sortie;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -18,6 +19,12 @@ class ParticipantType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $isAdmin = $options['isAdmin'];
+        $disabledCampus = true;
+        if ($isAdmin) {
+            $disabledCampus = false;
+        }
+
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom',
@@ -38,6 +45,7 @@ class ParticipantType extends AbstractType
             ->add('motPasse', PasswordType::class, [
                 'label' => 'mot de passe',
                 'required' => false,
+                'mapped' => false,
                 'attr'=> [
                     'autocomplete' => 'new-password'
                 ]
@@ -45,10 +53,7 @@ class ParticipantType extends AbstractType
             ->add('campus', EntityType::class, [
                 'class' => Campus::class,
                 'choice_label' => 'nom',
-                'disabled' => true, // Rendre le champ non modifiable
-            ])
-            ->add('btnCreate', SubmitType::class, [
-                'label' => 'Modifier',
+                'disabled' => $disabledCampus, // Rendre le champ non modifiable pour user
             ])
         ;
     }
@@ -57,6 +62,7 @@ class ParticipantType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Participant::class,
+            'isAdmin' => false,
         ]);
     }
 }

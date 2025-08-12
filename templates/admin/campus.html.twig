@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des campus | {{ parent() }}{% endblock %}
+
+{% block body %}
+    {% if is_granted("ROLE_ADMIN") %}
+        <h1>Gestion des campus</h1>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-sm"
+                   title="Gestion des campus">
+                <thead>
+                <tr>
+                    <th>Campus</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for campus in campuses %}
+                    <tr>
+                        <td>{{ campus.nom }}</td>
+                        <td>
+                            <a href="{{ path('sortie_affichage', {id: campus.id}) }}"
+                               class="btn btn-outline-dark btn-sm btn-custom-size"
+                               title="Modifier le campus">Modifier</a></td>
+                        <td>
+                            <a href="{{ path('sortie_affichage', {id: campus.id}) }}"
+                               class="btn btn-outline-dark btn-sm btn-custom-size"
+                               title="Supprimer le campus">Supprimer</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

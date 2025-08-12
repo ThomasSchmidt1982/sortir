@@ -32,14 +32,22 @@ final class ParticipantController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/modifier', name: 'participant_modifier', methods: ['GET', 'POST'])]
-    public function edit(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
+    public function edit(Request $request,
+                         EntityManagerInterface $em,
+                         UserPasswordHasherInterface $passwordHasher
+    ): Response
     {
         $participant = $this->getUser();
-        $participantForm = $this->createForm(ParticipantType::class, $participant);
+        $isAdmin = $participant->isAdministrateur();
+        $participantForm = $this->createForm(ParticipantType::class, $participant, [
+            'isAdmin' => $isAdmin,
+        ]);
         $participantForm->handleRequest($request);
         if($participantForm->isSubmitted() && $participantForm->isValid()){
-
-            $participant->setMotPasse($passwordHasher->hashPassword($participant, $participant->getMotPasse()));
+            $newMotPasse = $participant->getMotPasse()->getData();
+            if (!empty($newMotPasse)) {
+                $participant->setMotPasse($passwordHasher->hashPassword($participant, $newMotPasse));
+            }
 
             $em->flush();
 

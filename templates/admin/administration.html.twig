@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration | {{ parent() }}{% endblock %}
+
+{% block body %}
+    {% if is_granted("ROLE_ADMIN") %}
+        <div class="d-grid gap-3 col-10 mx-auto mt-5">
+
+        <a href="{{ path('admin_campus') }}"
+           class="btn btn-outline-dark"
+           title="gérer les campus">Gérer les campus</a>
+
+        <a href="{{ path('admin_ville') }}"
+           class="btn btn-outline-dark"
+           title="gérer les villes">Gérer les villes</a>
+
+        <a href="{{ path('admin_utilisateur') }}"
+        class="btn btn-outline-dark"
+        title="gérer les utilisateurs">Gérer les utilisateurs</a>
+</div>
+    {% endif %}
+{% endblock %}

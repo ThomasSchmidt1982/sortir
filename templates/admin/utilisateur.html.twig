@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs | {{ parent() }}{% endblock %}
+
+{% block body %}
+    {% if is_granted("ROLE_ADMIN") %}
+        <h1>Gestion des utilisateurs</h1>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-sm"
+                   title="Gestion des utilisateurs">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Pseudo</th>
+                    <th>Email</th>
+                    <th>Actif</th>
+                    <th>Campus</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for p in participants %}
+                    {% if not p.administrateur %}
+                        <tr>
+                            <td>{{ p.nom }}</td>
+                            <td>{{ p.prenom }}</td>
+                            <td>{{ p.pseudo }}</td>
+                            <td>{{ p.mail }}</td>
+                            <td>{{ p.actif ? 'oui' : 'non' }}</td>
+                            <td>{{ p.campus.nom }}</td>
+                            <td>
+                                {% if p.actif %}
+                                    <form method="POST" action="{{ path('admin_desactiver') }}">
+                                        <input type="hidden" name="participant_id" value="{{ p.id }}">
+                                        <button type="submit"
+                                                class="btn btn-outline-danger btn-sm btn-custom-size">désactiver
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="{{ path('admin_activer') }}">
+                                        <input type="hidden" name="participant_id" value="{{ p.id }}">
+                                        <button type="submit"
+                                                class="btn btn-outline-success btn-sm btn-custom-size">activer
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                <form method="POST" action="{{ path('admin_modifier') }}">
+                                    <input type="hidden" name="participant_id" value="{{ p.id }}">
+                                    <button type="submit"
+                                            class="btn btn-outline-info btn-sm btn-custom-size">Modifier
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% endif %}
+{% endblock %}

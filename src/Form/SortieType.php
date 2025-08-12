@@ -27,11 +27,22 @@ class SortieType extends AbstractType
             ])
             ->add('dateHeureDebut', DateTimeType::class, [
                 'widget' => 'choice',
-                'label' => 'Date et heure de la sortie'
+                'label' => 'Date et heure de la sortie',
+                'data' => new \DateTime('now'),
+                'html5' => false,                   // permet plus de contrôle
+                'model_timezone' => 'Europe/Paris',
+                'view_timezone' => 'Europe/Paris',
+                // options utiles :
+                'years' => range((int)date('Y'), (int)date('Y') + 1),
+                'minutes' => [0, 15, 30, 45],       // pas de minutes toutes les minutes
+                'with_seconds' => false,
+
             ])
             ->add('dateLimiteInscription', DateTimeType::class, [
                 'widget' => 'choice',
                 'label' => 'Date limite d\'inscription',
+                'data' => new \DateTime('now'),
+
             ])
             ->add('nbInscriptionMax', IntegerType::class, [
                 'label' => 'Nombre de places',

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Le profil de {{ participant.prenom }} {{ participant.nom }}</h1>
+    <div>
+        {{ form_start(participantForm) }}
+        {{ form_widget(participantForm) }}
+        <input type="hidden" name="participant_id" value="{{ participant.id }}">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        {{ form_end(participantForm) }}
+    </div>
+{% endblock %}
+
+{% block title %}
+    Profil utilisateur | {{ parent() }}
+{% endblock %}
+
