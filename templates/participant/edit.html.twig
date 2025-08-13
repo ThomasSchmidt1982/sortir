@@ -5,6 +5,8 @@
     <div>
         {{ form_start(participantForm) }}
         {{ form_widget(participantForm) }}
+        <input type="hidden" name="participant_id" value="{{ participant.id }}">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
         {{ form_end(participantForm) }}
     </div>
 {% endblock %}

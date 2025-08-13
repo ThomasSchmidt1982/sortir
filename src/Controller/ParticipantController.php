@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\ParticipantType;
+use App\Repository\CampusRepository;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,11 +16,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class ParticipantController extends AbstractController
 {
 
-    #[Route('/participant/{id}', name: 'participant_affichage', requirements: ['id'=>'\d+'], methods: ['GET'])]
+    #[Route('/participant/{id}', name: 'participant_affichage', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         $id,
         ParticipantRepository $participantRepository
-    ):Response
+    ): Response
     {
         $participant = $participantRepository->find($id);
 
@@ -32,35 +33,36 @@ final class ParticipantController extends AbstractController
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     #[Route('/modifier', name: 'participant_modifier', methods: ['GET', 'POST'])]
-    public function edit(Request $request,
-                         EntityManagerInterface $em,
-                         UserPasswordHasherInterface $passwordHasher
+    public function edit(Request                     $request,
+                         EntityManagerInterface      $em,
+                         UserPasswordHasherInterface $passwordHasher,
+                         CampusRepository $campusRepository
     ): Response
     {
         $participant = $this->getUser();
         $isAdmin = $participant->isAdministrateur();
+        $participantId = $request->request->get('participant_id');
         $participantForm = $this->createForm(ParticipantType::class, $participant, [
             'isAdmin' => $isAdmin,
         ]);
         $participantForm->handleRequest($request);
-        if($participantForm->isSubmitted() && $participantForm->isValid()){
+        if ($participantForm->isSubmitted() && $participantForm->isValid()) {
             if (!$participant) {
                 throw $this->createNotFoundException('Participant introuvable.');
             }
-            $newMotPasse = $participant->getMotPasse()->getData();
+            $newMotPasse = $participantForm->get('motPasse')->getData();
             if (!empty($newMotPasse)) {
                 $participant->setMotPasse($passwordHasher->hashPassword($participant, $newMotPasse));
             }
-
             $em->flush();
-
             $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
-
-            return $this->render('sortie/sortie.html.twig');
+            $campusList = $campusRepository->findAll();
+            return $this->redirectToRoute('sortie_list');
         }
 
         return $this->render('participant/edit.html.twig', [
             'participantForm' => $participantForm,
+            'participant' => $participant,
         ]);
     }
 }

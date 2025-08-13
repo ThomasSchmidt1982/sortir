@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -32,7 +33,7 @@ class ParticipantType extends AbstractType
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom',
             ])
-            ->add('pseudo' , TextType::class, [
+            ->add('pseudo', TextType::class, [
                 'label' => 'pseudo',
             ])
             ->add('telephone', TextType::class, [
@@ -42,20 +43,19 @@ class ParticipantType extends AbstractType
             ->add('mail', EmailType::class, [
                 'label' => 'mail',
             ])
-            ->add('motPasse', PasswordType::class, [
-                'label' => 'mot de passe',
-                'required' => false,
-                'mapped' => false,
-                'attr'=> [
-                    'autocomplete' => 'new-password'
-                ]
+            ->add('motPasse', RepeatedType::class, [
+                'type' => PasswordType::class,
+                    'required' => false,
+                    'mapped' => false,
+                    'first_options' => ['label' => 'mot de passe',],
+                    'second_options' => ['label' => 'confirmer mot de passe',],
+                    'invalid_message' => 'Les mots de passe doivent correspondre.',
             ])
             ->add('campus', EntityType::class, [
                 'class' => Campus::class,
                 'choice_label' => 'nom',
                 'disabled' => $disabledCampus, // Rendre le champ non modifiable pour user
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Etat;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\AnnulationType;
@@ -12,6 +11,7 @@ use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
 use App\Service\SortieService;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,44 +26,40 @@ final class SortieController extends AbstractController
         Request $request,
         SortieRepository $sortieRepository,
         EtatRepository $etatRepository,
-        EntityManagerInterface $em,
         SortieService $sortieService,
     ): Response {
-        // récup ID de la sortie depuis front
+        // récup ID de la sortie depuis front (POST)
         $sortieId = $request->request->get('sortie_id');
+        if (!$sortieId) {
+            throw $this->createNotFoundException("L'ID de la sortie est requis.");
+        }
         $sortie = $sortieRepository->find($sortieId);
-        $etatOuverte = $etatRepository->findOneBy(['libelle' => 'Ouverte']);
-        $etatSortie = $sortie->getEtat();
-        $today = new \DateTimeImmutable();
-        $dateLimiteInscription = $sortie->getDateLimiteInscription();
 
         if (!$sortie) {
             $this->addFlash('error', 'Sortie introuvable.');
             return $this->redirectToRoute('sortie_list');
         }
-        if (!$sortieId) {
-            throw $this->createNotFoundException('L\'ID de la sortie est requis.');
-        }
-
+        $etatOuverte = $etatRepository->findOneBy(['libelle' => 'Ouverte']);
+        $etatSortie = $sortie->getEtat();
+        $today = new DateTimeImmutable();
+        $dateLimiteInscription = $sortie->getDateLimiteInscription();
         // Création du formulaire
         $annulerForm = $this->createForm(AnnulationType::class, $sortie);
         $annulerForm->handleRequest($request);
-
         if ($annulerForm->isSubmitted() && $annulerForm->isValid()) {
             if ($dateLimiteInscription >= $today && $etatSortie === $etatOuverte) {
                 $sortieService->setEtatAnnulee($sortie);
-                $this->addFlash("success", "la sortie a été annulée avec succès !");
 
+                $this->addFlash("success", "la sortie a été annulée avec succès !");
                 return $this->redirectToRoute('sortie_list');
+            }else{
+                $this->addFlash("warning", "Impossible d'annuler la sortie car la date limite est passée ou l'état n'est pas 'Ouverte'.");
             }
         }
-
-        // Affichage du formulaire en cas de problème
         return $this->render('sortie/annuler.html.twig', [
             'annulerForm' => $annulerForm->createView(),
             'sortie' => $sortie,
         ]);
-
     }
 
 
@@ -77,15 +73,15 @@ final class SortieController extends AbstractController
         $sortieId = $request->request->get('sortie_id');
         // recup sortie dans la bdd
         $sortie = $sortieRepository->find($sortieId);
-
+        // l'utilisateur connecté
         $user = $this->getUser();
 
         if (!$user instanceof Participant) {
             throw $this->createAccessDeniedException('Vous devez être connecté pour vous désister.');
         }
 
-        // si la date cloture < aujourdhui (Possibilité de se désister jusqu'à l'heure de la sortie)
-        $today = new \DateTimeImmutable();
+        // si la date cloture < aujourd'hui (Possibilité de se désister jusqu'à l'heure de la sortie)
+        $today = new DateTimeImmutable();
         $dateLimiteInscription = $sortie->getDateLimiteInscription();
         if($dateLimiteInscription >= $today) {
             // enlever l'utilisateur aux participants de la sortie
@@ -152,7 +148,6 @@ final class SortieController extends AbstractController
 
         // Redirection vers la liste des sorties
         return $this->redirectToRoute('sortie_list');
-
     }
 
 
@@ -170,9 +165,6 @@ final class SortieController extends AbstractController
         $sortieForm->handleRequest($request);
 // todo verifier si user est organisateur + redirect
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
-
-
-
             $em->flush();
             // Message de confirmation
             $this->addFlash('success', 'La sortie a été modifiée avec succès.');
@@ -209,8 +201,6 @@ final class SortieController extends AbstractController
     #[Route('/sortie/creer', name: 'sortie_creer', methods: ['GET', 'POST'])]
     public function creer(
         Request $request,
-        CampusRepository $campusRepository,
-        ParticipantRepository $participantRepository,
         EntityManagerInterface $em,
         SortieService $sortieService,
     ): Response{
@@ -222,10 +212,14 @@ final class SortieController extends AbstractController
         //traiter le formulaire
         $sortieForm->handleRequest($request);
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
+            $user=$this->getUser();
+            if (!$user instanceof Participant) {
+                throw $this->createAccessDeniedException('Vous devez être connecté pour créer une sortie.');
+            }
             // defini l'état
             $sortieService->setEtatEnCreation($sortie);
             // defini l'organisateur est le user connecté
-            $sortie->setOrganisateur($user=$this->getUser());
+            $sortie->setOrganisateur($user);
             $em->persist($sortie);
             $em->flush();
 
@@ -295,7 +289,7 @@ final class SortieController extends AbstractController
         // Récupérer le campus de l'utilisateur connecté
         $userCampus = $user->getCampus();
         // creation de la date du jour
-        $currentDateTime = new \DateTimeImmutable();
+        $currentDateTime = new DateTimeImmutable();
 
         $filters =[
             'campus' => $request->request->get('campus', $userCampus?->getId()),
