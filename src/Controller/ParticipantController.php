@@ -44,6 +44,9 @@ final class ParticipantController extends AbstractController
         ]);
         $participantForm->handleRequest($request);
         if($participantForm->isSubmitted() && $participantForm->isValid()){
+            if (!$participant) {
+                throw $this->createNotFoundException('Participant introuvable.');
+            }
             $newMotPasse = $participant->getMotPasse()->getData();
             if (!empty($newMotPasse)) {
                 $participant->setMotPasse($passwordHasher->hashPassword($participant, $newMotPasse));

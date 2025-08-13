@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Etat;
+use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Form\AnnulationType;
 use App\Form\SortieType;
@@ -79,6 +80,9 @@ final class SortieController extends AbstractController
 
         $user = $this->getUser();
 
+        if (!$user instanceof Participant) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour vous désister.');
+        }
 
         // si la date cloture < aujourdhui (Possibilité de se désister jusqu'à l'heure de la sortie)
         $today = new \DateTimeImmutable();
@@ -113,6 +117,10 @@ final class SortieController extends AbstractController
         $sortie = $sortieRepository->find($sortieId);
 
         $user = $this->getUser();
+
+        if (!$user instanceof Participant) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour vous désister.');
+        }
         // Ajouter l'utilisateur aux participants de la sortie
         $sortie->addParticipant($user);
         // Sauvegarder les modifications en base

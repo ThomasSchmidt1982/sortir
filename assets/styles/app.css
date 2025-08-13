@@ -56,8 +56,8 @@ ul {
 }
 
 .button-52:hover:after {
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
 }
 
 @media (min-width: 768px) {
