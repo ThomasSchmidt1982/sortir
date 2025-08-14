@@ -1,37 +1,43 @@
-# Image PHP + Apache
+# Utiliser l'image PHP officielle avec Apache
 FROM php:8.2-apache
 
-# Installer unzip, git et curl (Composer et Symfony CLI en ont besoin)
-RUN apt-get update && apt-get install -y unzip git curl
+# Installer les extensions PHP nécessaires
+RUN apt-get update && apt-get install -y \
+    git unzip libicu-dev libzip-dev libonig-dev curl \
+    && docker-php-ext-install intl pdo_mysql zip opcache
 
-# Installer Composer (copié depuis l'image officielle composer)
+# Activer mod_rewrite pour Apache (utile pour Symfony)
+RUN a2enmod rewrite
+
+# Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Installer Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash && \
     mv /root/.symfony*/bin/symfony /usr/local/bin/symfony
 
-# Copier tout le projet dans /var/www
-COPY . /var/www/
-
-# Installer extensions PHP nécessaires pour MariaDB/MySQL
-RUN docker-php-ext-install mysqli pdo pdo_mysql
-
-# Se placer dans le dossier du projet
+# Copier les fichiers de l'application dans le conteneur
 WORKDIR /var/www
+COPY . /var/www
+
+# Donner les permissions à Apache
+RUN chown -R www-data:www-data /var/www
+
+# Autoriser Composer à s'exécuter en tant que root et exécuter les scripts
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Installer les dépendances PHP via Composer
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
 # Supprimer le dossier html par défaut et pointer vers /var/www/public
 RUN rm -rf /var/www/html && ln -s /var/www/public /var/www/html
 
-# Activer mod_rewrite
-RUN a2enmod rewrite
+# Configurer Apache pour Symfony
+COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Adapter Apache pour Render (utiliser le port défini par $PORT)
-RUN sed -i "s/Listen 80/Listen \${PORT}/" /etc/apache2/ports.conf && \
-    echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# Exposer le port
+EXPOSE 80
 
 # Lancer Apache
 CMD ["apache2-foreground"]
+
