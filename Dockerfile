@@ -1,23 +1,25 @@
 # Image PHP + Apache
 FROM php:8.2-apache
 
-# Installer unzip et git (Composer en a souvent besoin)
+# Installer unzip et git (nécessaire pour composer install)
 RUN apt-get update && apt-get install -y unzip git
 
-# Installer Composer
+# Installer Composer (copié depuis l'image officielle composer)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copier tout le projet (pas juste public)
+# Copier tout le projet dans /var/www
 COPY . /var/www/
 
-# Installer les extensions PHP nécessaires
+# Installer extensions PHP nécessaires pour MariaDB/MySQL
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Lancer composer install (dans /var/www)
+# Se placer dans le dossier du projet
 WORKDIR /var/www
+
+# Installer les dépendances PHP via Composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Copier le contenu de /public dans le dossier Apache
+# Supprimer le dossier html par défaut et pointer vers /var/www/public
 RUN rm -rf /var/www/html && ln -s /var/www/public /var/www/html
 
 # Activer mod_rewrite
