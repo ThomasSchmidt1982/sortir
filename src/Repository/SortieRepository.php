@@ -173,7 +173,6 @@ class SortieRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
     public function findNbParticipant(int $sortieId): int
     {
         return $this->createQueryBuilder('s')

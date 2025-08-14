@@ -15,7 +15,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class ParticipantController extends AbstractController
 {
-
+    #[IsGranted("ROLE_USER")]
     #[Route('/participant/{id}', name: 'participant_affichage', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         $id,
@@ -23,15 +23,13 @@ final class ParticipantController extends AbstractController
     ): Response
     {
         $participant = $participantRepository->find($id);
-
         return $this->render('participant/affichage.html.twig', [
             "participant" => $participant,
         ]);
-
     }
 
 
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted("ROLE_USER")]
     #[Route('/modifier', name: 'participant_modifier', methods: ['GET', 'POST'])]
     public function edit(Request                     $request,
                          EntityManagerInterface      $em,

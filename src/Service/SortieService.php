@@ -113,6 +113,6 @@ class SortieService
 
     public function cloturerDateLimite(Sortie $sortie):void
     {
-
     }
+
 }

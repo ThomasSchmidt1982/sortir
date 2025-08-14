@@ -4,7 +4,7 @@
 
 {% block body %}
     {% if is_granted("ROLE_ADMIN") %}
-        <h1>Gestion des campus</h1>
+        <h1>Gestion des campus --- en construction ---</h1>
 
         <div class="table-responsive">
             <table class="table table-hover table-sm"
@@ -20,11 +20,11 @@
                     <tr>
                         <td>{{ campus.nom }}</td>
                         <td>
-                            <a href="{{ path('sortie_affichage', {id: campus.id}) }}"
+                            <a href="{{ path('admin_campus')}}"
                                class="btn btn-outline-dark btn-sm btn-custom-size"
                                title="Modifier le campus">Modifier</a></td>
                         <td>
-                            <a href="{{ path('sortie_affichage', {id: campus.id}) }}"
+                            <a href="{{ path('admin_campus')}}"
                                class="btn btn-outline-dark btn-sm btn-custom-size"
                                title="Supprimer le campus">Supprimer</a></td>
                     </tr>

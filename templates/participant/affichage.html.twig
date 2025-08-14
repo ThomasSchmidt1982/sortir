@@ -23,10 +23,10 @@
         <dd>{{ participant.mail }}</dd>
 
         <dt>Administrateur :</dt>
-        <dd>{{ participant.administrateur }}</dd>
+        <dd>{{ participant.administrateur? 'oui' : 'non' }}</dd>
 
         <dt>Actif :</dt>
-        <dd>{{ participant.actif }}</dd>
+        <dd>{{ participant.actif? 'oui' : 'non' }}</dd>
 
         <dt>Campus :</dt>
         <dd>{{ participant.campus.nom }}</dd>

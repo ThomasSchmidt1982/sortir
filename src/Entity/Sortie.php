@@ -237,11 +237,10 @@ class Sortie
 
     public function addParticipant(Participant $participant): static
     {
-        if (!$this->participants->contains($participant)) {
-            $this->participants->add($participant);
-            $participant->addEstInscrit($this);
+        if (!$this->participants->contains($participant)) {     // évite doublons
+            $this->participants->add($participant);     // Ajoute le participant à la sortie côté propriétaire de la relation
+            $participant->addEstInscrit($this);     // maj de l'autre côté de la relation
         }
-
         return $this;
     }
 
@@ -250,7 +249,6 @@ class Sortie
         if ($this->participants->removeElement($participant)) {
             $participant->removeEstInscrit($this);
         }
-
         return $this;
     }
 

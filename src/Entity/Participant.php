@@ -6,9 +6,7 @@ use App\Repository\ParticipantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Exception\AccountStatusException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: "participant", uniqueConstraints: [
     new ORM\UniqueConstraint(name: "unique_mail_pseudo", columns: ["mail", "pseudo"])
 ])]
-class Participant implements UserInterface, PasswordAuthenticatedUserInterface
+class Participant implements UserInterface
 {
 
     #[ORM\Id]
@@ -38,10 +36,10 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Assert\NotBlank(message: "Veuillez renseigner le champ prénom")]
     #[Assert\Length(
-        minMessage: "Le prénom doit contenir au moins {{ limit }} caractères",
-        maxMessage: "Le prénom ne peut contenir plus de {{ limit }} caractères",
         min: 2,
         max: 100,
+        minMessage: "Le prénom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le prénom ne peut contenir plus de {{ limit }} caractères",
     )]
     #[ORM\Column(length: 100)]
     private ?string $prenom = null;
@@ -49,10 +47,10 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Assert\NotBlank(message: "Veuillez renseigner le champ pseudo")]
     #[Assert\Length(
-        minMessage: "Le pseudo doit contenir au moins {{ limit }} caractères",
-        maxMessage: "Le pseudo ne peut contenir plus de {{ limit }} caractères",
         min: 2,
         max: 100,
+        minMessage: "Le pseudo doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le pseudo ne peut contenir plus de {{ limit }} caractères",
     )]
     #[ORM\Column(length: 100, unique:true)]
     private ?string $pseudo = null;

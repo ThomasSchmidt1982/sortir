@@ -4,7 +4,7 @@
 
 {% block body %}
     {% if is_granted("ROLE_ADMIN") %}
-<h1>Gestion des villes</h1>
+<h1>Gestion des villes --- en construction --- </h1>
 
         <div class="table-responsive">
             <table class="table table-hover table-sm"
@@ -20,11 +20,11 @@
                     <tr>
                         <td>{{ ville.nom }}</td>
                         <td>
-                            <a href="{{ path('sortie_affichage', {id: ville.id}) }}"
+                            <a href="{{ path('admin_ville') }}"
                                class="btn btn-outline-dark btn-sm btn-custom-size"
                                title="Modifier le ville">Modifier</a></td>
                         <td>
-                            <a href="{{ path('sortie_affichage', {id: ville.id}) }}"
+                            <a href="{{ path('admin_ville') }}"
                                class="btn btn-outline-dark btn-sm btn-custom-size"
                                title="Supprimer le ville">Supprimer</a></td>
                     </tr>

@@ -13,9 +13,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class AdminController extends AbstractController
 {
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin', name: 'app_admin')]
     public function administration(): Response
     {
@@ -24,6 +26,8 @@ final class AdminController extends AbstractController
         ]);
     }
 
+
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin/campus', name: 'admin_campus')]
     public function campus(
         CampusRepository $campusRepository,
@@ -35,6 +39,8 @@ final class AdminController extends AbstractController
         ]);
     }
 
+
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin/ville', name: 'admin_ville')]
     public function ville(
         VilleRepository $villeRepository,
@@ -46,6 +52,8 @@ final class AdminController extends AbstractController
         ]);
     }
 
+
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin/utilisateur', name: 'admin_utilisateur')]
     public function utilisateur(
         ParticipantRepository $participantRepository,
@@ -58,6 +66,7 @@ final class AdminController extends AbstractController
     }
 
 
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin/desactiver', name: 'admin_desactiver', methods: ['POST'])]
     public function desactiver(
         Request                $request,
@@ -78,6 +87,8 @@ final class AdminController extends AbstractController
         return $this->redirectToRoute('admin_utilisateur');
     }
 
+
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin/activer', name: 'admin_activer', methods: ['POST'])]
     public function activer(
         Request                $request,
@@ -98,6 +109,8 @@ final class AdminController extends AbstractController
         return $this->redirectToRoute('admin_utilisateur');
     }
 
+
+    #[isGranted('ROLE_ADMIN')]
     #[Route('/admin/modifier', name: 'admin_modifier', methods: ['GET', 'POST'])]
     public function modifier(
         Request                     $request,
@@ -120,6 +133,8 @@ final class AdminController extends AbstractController
             }
             $em->flush();
             $this->addFlash('success', 'Le profil de ' . $participant->getPseudo() . ' a été mis à jour avec succès.');
+
+        return $this->redirectToRoute('admin_utilisateur');
         }
 
         return $this->render('admin/modifier.html.twig', [

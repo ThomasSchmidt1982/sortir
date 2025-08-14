@@ -20,73 +20,75 @@
             </select>
         </div>
 
+        <fieldset>
+            <div class="form-check mb-3">
+                {# Champ caché pour transmettre "0" si la checkbox est décochée #}
+                <input type="hidden" name="showFinished" value="0">
+                {# Checkbox qui transmet "1" si cochée #}
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="showFinished"
+                       name="showFinished"
+                       value="1"
+                       {% if selectedFilters.showFinished %}checked{% endif %}>
+                <label class="form-check-label" for="showFinished">Sorties terminées</label>
+            </div>
 
-        <div class="form-check mb-3">
-            {# Champ caché pour transmettre "0" si la checkbox est décochée #}
-            <input type="hidden" name="showFinished" value="0">
-            {# Checkbox qui transmet "1" si cochée #}
-            <input  class="form-check-input"
-                    type="checkbox"
-                    id="showFinished"
-                    name="showFinished"
-                    value="1"
-                    {% if selectedFilters.showFinished %}checked{% endif %}>
-            <label class="form-check-label" for="showFinished">Sorties terminées</label>
-        </div>
-
-        <div class="form-check mb-3">
+            <div class="form-check mb-3">
                 {# Champ caché pour transmettre "0" si la checkbox est décochée #}
                 <input type="hidden" name="showNotRegistered" value="0">
                 {# Checkbox qui transmet "1" si cochée #}
                 <input class="form-check-input"
                        type="checkbox"
-                        id="showNotRegistered"
-                        name="showNotRegistered"
-                        value="1"
-                        {% if selectedFilters.showNotRegistered %}checked{% endif %}>
-                <label  class="form-check-label" for="showNotRegistered">Sorties où je ne me suis pas inscrit/e</label>
-        </div>
+                       id="showNotRegistered"
+                       name="showNotRegistered"
+                       value="1"
+                       {% if selectedFilters.showNotRegistered %}checked{% endif %}>
+                <label class="form-check-label" for="showNotRegistered">Sorties où je ne me suis pas inscrit/e</label>
+            </div>
 
-        <div class="form-check mb-3">
+            <div class="form-check mb-3">
                 {# Champ caché pour transmettre "0" si la checkbox est décochée #}
                 <input type="hidden" name="showRegistered" value="0">
                 {# Checkbox qui transmet "1" si cochée #}
                 <input class="form-check-input"
                        type="checkbox"
-                        id="showRegistered"
-                        name="showRegistered"
-                        value="1"
-                        {% if selectedFilters.showRegistered %}checked{% endif %}>
-                <label  class="form-check-label" for="showRegistered">Sorties auxquelles je suis inscrit/e</label>
-        </div>
+                       id="showRegistered"
+                       name="showRegistered"
+                       value="1"
+                       {% if selectedFilters.showRegistered %}checked{% endif %}>
+                <label class="form-check-label" for="showRegistered">Sorties auxquelles je suis inscrit/e</label>
+            </div>
 
-        <div class="form-check mb-3">
+            <div class="form-check mb-3">
                 {# Champ caché pour transmettre "0" si la checkbox est décochée #}
                 <input type="hidden" name="showIOrganize" value="0">
                 {# Checkbox qui transmet "1" si cochée #}
                 <input class="form-check-input"
                        type="checkbox"
-                        id="showIOrganize"
-                        name="showIOrganize"
-                        value="1"
-                        {% if selectedFilters.showIOrganize %}checked{% endif %}>
-                <label  class="form-check-label" for="showIOrganize">Sorties dont je suis l'organisateur/trice</label>
-        </div>
+                       id="showIOrganize"
+                       name="showIOrganize"
+                       value="1"
+                       {% if selectedFilters.showIOrganize %}checked{% endif %}>
+                <label class="form-check-label" for="showIOrganize">Sorties dont je suis l'organisateur/trice</label>
+            </div>
 
-        <div class="mb-3">
-        <label for="searchTerm" class="form-label">Le nom de la sortie contient</label>
-                <input class="form-control" type="text" id="searchTerm" name="searchTerm" value="{{ selectedFilters.searchTerm }}" placeholder="Nom ou mot-clé">
-        </div>
-        <div class="mb-3">
-        <label  class="form-label" for="startDate">Date de début :</label>
-                <input  class="form-control" type="date" id="startDate" name="startDate" value="{{ selectedFilters.startDate }}">
-                <label  class="form-label" for="endDate">Date de fin :</label>
-                <input  class="form-control" type="date" id="endDate" name="endDate" value="{{ selectedFilters.endDate }}">
-        </div>
+            <div class="mb-3">
+                <label for="searchTerm" class="form-label">Le nom de la sortie contient</label>
+                <input class="form-control" type="text" id="searchTerm" name="searchTerm"
+                       value="{{ selectedFilters.searchTerm }}" placeholder="Nom ou mot-clé">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="startDate">Date de début :</label>
+                <input class="form-control" type="date" id="startDate" name="startDate"
+                       value="{{ selectedFilters.startDate }}">
+                <label class="form-label" for="endDate">Date de fin :</label>
+                <input class="form-control" type="date" id="endDate" name="endDate"
+                       value="{{ selectedFilters.endDate }}">
+            </div>
 
-
-        <button class="btn btn-info" type="submit">Rechercher</button>
-
+            <button class="btn btn-info" type="submit">Rechercher</button>
+        </fieldset>
 
     </form>
 
@@ -97,15 +99,20 @@
                 <th>Nom de la sortie</th>
                 <th>Date de la sortie</th>
                 <th class="d-none d-md-table-cell">
-                    Clôture</th>
+                    Clôture
+                </th>
                 <th class="d-none d-md-table-cell">
-                    Inscrits/Places</th>
+                    Inscrits/Places
+                </th>
                 <th class="d-none d-md-table-cell">
-                    Etat</th>
+                    Etat
+                </th>
                 <th class="d-none d-md-table-cell">
-                    Inscrit</th>
+                    Inscrit
+                </th>
                 <th class="d-none d-md-table-cell">
-                    Organisateur</th>
+                    Organisateur
+                </th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -115,7 +122,8 @@
                     <td>{{ sortie.nom }}</td>
                     <td>{{ sortie.dateHeureDebut | date("d-m-Y") }}</td>
                     <td class="d-none d-md-table-cell">{{ sortie.dateLimiteInscription | date("d-m-Y") }}</td>
-                    <td class="d-none d-md-table-cell">{{ sortie.participants|length }} / {{ sortie.nbInscriptionMax }}</td>
+                    <td class="d-none d-md-table-cell">{{ sortie.participants|length }}
+                        / {{ sortie.nbInscriptionMax }}</td>
                     <td class="d-none d-md-table-cell">{{ sortie.etat.libelle }}<br>
                         {% if sortie.motifAnnulation  is not empty %}
                             <i>Motif : {{ sortie.motifAnnulation }}</i>
@@ -123,7 +131,8 @@
                     </td>
                     <td class="d-none d-md-table-cell">{% if user in sortie.participants %} X {% else %}{% endif %}</td>
                     <td class="d-none d-md-table-cell">
-                        <a class="btn btn-outline-dark btn-sm btn-custom-size" href="{{ path('participant_affichage', {id: sortie.organisateur.id} )}}">
+                        <a class="btn btn-outline-dark btn-sm btn-custom-size"
+                           href="{{ path('participant_affichage', {id: sortie.organisateur.id} ) }}">
                             {{ sortie.organisateur.nom }} {{ sortie.organisateur.prenom|slice(0,1) }}.</a></td>
                     {% if sortie.etat.libelle != 'Historisée' %}
                         <td>
@@ -133,31 +142,41 @@
                             {% if sortie.organisateur == app.user %}
                                 <form method="POST" action="{{ path('sortie_modifier') }}">
                                     <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                    <button type="submit" class="btn btn-outline-warning btn-sm btn-custom-size">Modifier</button>
+                                    <button type="submit" class="btn btn-outline-warning btn-sm btn-custom-size">
+                                        Modifier
+                                    </button>
                                 </form>
                                 {% if sortie.etat.libelle == 'Ouverte' %}
                                     <form method="POST" action="{{ path('sortie_annuler') }}">
                                         <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm btn-custom-size">Annuler</button>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm btn-custom-size">
+                                            Annuler
+                                        </button>
                                     </form>
                                 {% endif %}
                                 {% if sortie.etat.libelle == 'En création' %}
                                     <form method="POST" action="{{ path('sortie_publier') }}">
                                         <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                        <button type="submit" class="btn btn-outline-warning btn-sm btn-custom-size">Publier</button>
+                                        <button type="submit" class="btn btn-outline-warning btn-sm btn-custom-size">
+                                            Publier
+                                        </button>
                                     </form>
                                 {% endif %}
                             {% endif %}
                             {% if sortie.isAvailable(user, currentDateTime) %}
                                 <form method="POST" action="{{ path('sortie_inscrire', {id: sortie.id}) }}">
                                     <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                    <button type="submit" class="btn btn-outline-dark btn-sm btn-custom-size">S'inscrire</button>
+                                    <button type="submit" class="btn btn-outline-dark btn-sm btn-custom-size">
+                                        S'inscrire
+                                    </button>
                                 </form>
                             {% endif %}
                             {% if sortie.canUserWithdraw(user, currentDateTime) %}
                                 <form method="POST" action="{{ path('sortie_desister', {id: sortie.id}) }}">
                                     <input type="hidden" name="sortie_id" value="{{ sortie.id }}">
-                                    <button type="submit" class="btn btn-outline-info btn-sm btn-custom-size">Se désister</button>
+                                    <button type="submit" class="btn btn-outline-info btn-sm btn-custom-size">Se
+                                        désister
+                                    </button>
                                 </form>
                             {% endif %}
                         </td>

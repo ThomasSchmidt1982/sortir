@@ -13,10 +13,10 @@
                 <tr>
                     <th>Nom</th>
                     <th>Prénom</th>
-                    <th>Pseudo</th>
-                    <th>Email</th>
+                    <th class="d-none d-md-table-cell">Pseudo</th>
+                    <th class="d-none d-md-table-cell">Email</th>
                     <th>Actif</th>
-                    <th>Campus</th>
+                    <th class="d-none d-md-table-cell">Campus</th>
                     <th>Action</th>
                 </tr>
                 </thead>
@@ -26,10 +26,10 @@
                         <tr>
                             <td>{{ p.nom }}</td>
                             <td>{{ p.prenom }}</td>
-                            <td>{{ p.pseudo }}</td>
-                            <td>{{ p.mail }}</td>
+                            <td class="d-none d-md-table-cell">{{ p.pseudo }}</td>
+                            <td class="d-none d-md-table-cell">{{ p.mail }}</td>
                             <td>{{ p.actif ? 'oui' : 'non' }}</td>
-                            <td>{{ p.campus.nom }}</td>
+                            <td class="d-none d-md-table-cell">{{ p.campus.nom }}</td>
                             <td>
                                 {% if p.actif %}
                                     <form method="POST" action="{{ path('admin_desactiver') }}">
