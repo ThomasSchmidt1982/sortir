@@ -1,25 +1,31 @@
-# Image officielle PHP 8.2 + Apache
+# Image PHP + Apache
 FROM php:8.2-apache
 
-# Copier le contenu de /public vers le dossier web d'Apache
-COPY public/ /var/www/html/
+# Installer unzip et git (Composer en a souvent besoin)
+RUN apt-get update && apt-get install -y unzip git
 
-# Copier aussi le reste du projet (pour autoload, config, etc.)
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copier tout le projet (pas juste public)
 COPY . /var/www/
 
-# Installer extensions PHP nécessaires pour MariaDB/MySQL
+# Installer les extensions PHP nécessaires
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Activer mod_rewrite (utile si tu as un .htaccess)
+# Lancer composer install (dans /var/www)
+WORKDIR /var/www
+RUN composer install --no-dev --optimize-autoloader
+
+# Copier le contenu de /public dans le dossier Apache
+RUN rm -rf /var/www/html && ln -s /var/www/public /var/www/html
+
+# Activer mod_rewrite
 RUN a2enmod rewrite
 
-# Ajuster les permissions (évite les erreurs de droits)
-RUN chown -R www-data:www-data /var/www/html
-
-# Apache va écouter sur le port que Render définit via la variable $PORT
-# On met à jour la config pour que ça fonctionne sur Render
+# Adapter Apache pour Render
 RUN sed -i "s/Listen 80/Listen \${PORT}/" /etc/apache2/ports.conf && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Commande de démarrage
+# Lancer Apache
 CMD ["apache2-foreground"]
